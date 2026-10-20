@@ -10,10 +10,10 @@ import {
   Plus,
   Search,
   Sparkles,
-  Star,
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Group } from 'three'
 
 const STORAGE_KEY = 'langit-calendar-tasks-v1'
 
@@ -158,8 +158,6 @@ function App() {
 
   const monthDates = useMemo(() => getMonthGrid(month), [month])
 
-  const selectedDateObj = useMemo(() => parseKey(selectedDate), [selectedDate])
-
   const dayTasks = useMemo(
     () =>
       tasks.filter((task) => task.date === selectedDate).filter((task) => {
@@ -172,8 +170,6 @@ function App() {
       }),
     [tasks, selectedDate, searchTerm, statusFilter, priorityFilter],
   )
-
-  const todayKey = formatKey(new Date())
 
   const addTask = () => {
     if (!draft.title.trim()) return
@@ -329,57 +325,48 @@ function App() {
               )}
 
               <div className="space-y-3">
-                {tasks
-                  .filter((task) => task.date === selectedDate)
-                  .filter((task) => {
-                    const term = searchTerm.trim().toLowerCase()
-                    const matchesText = !term || task.title.toLowerCase().includes(term) || (task.notes || '').toLowerCase().includes(term)
-                    const matchesStatus = statusFilter === 'All' || (statusFilter === 'Completed' ? task.done : !task.done)
-                    const matchesPriority = priorityFilter === 'All' || task.priority === priorityFilter
-                    return matchesText && matchesStatus && matchesPriority
-                  })
-                  .map((task) => (
-                    <div key={task.id} className="rounded-2xl border border-white/10 bg-slate-900/80 p-3">
-                      <div className="mb-2 flex items-start gap-3">
-                        <button
-                          className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-md border ${task.done ? 'border-emerald-400 bg-emerald-400 text-slate-950' : 'border-slate-600 bg-transparent'}`}
-                          onClick={() => toggleTask(task.id)}
-                        >
-                          {task.done && <Check className="h-3 w-3" />}
-                        </button>
+                {dayTasks.map((task) => (
+                  <div key={task.id} className="rounded-2xl border border-white/10 bg-slate-900/80 p-3">
+                    <div className="mb-2 flex items-start gap-3">
+                      <button
+                        className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-md border ${task.done ? 'border-emerald-400 bg-emerald-400 text-slate-950' : 'border-slate-600 bg-transparent'}`}
+                        onClick={() => toggleTask(task.id)}
+                      >
+                        {task.done && <Check className="h-3 w-3" />}
+                      </button>
 
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className={`truncate font-medium ${task.done ? 'text-slate-400 line-through' : 'text-slate-100'}`}>
-                              {task.title}
-                            </p>
-                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${priorityColor(task.priority)}`}>
-                              {task.priority}
-                            </span>
-                          </div>
-                          <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
-                            <Clock3 className="h-3.5 w-3.5" />
-                            <span>
-                              {task.start} - {task.end}
-                            </span>
-                          </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className={`truncate font-medium ${task.done ? 'text-slate-400 line-through' : 'text-slate-100'}`}>
+                            {task.title}
+                          </p>
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${priorityColor(task.priority)}`}>
+                            {task.priority}
+                          </span>
                         </div>
-
-                        <button className="rounded-lg p-1 text-slate-400 hover:bg-white/5" onClick={() => deleteTask(task.id)}>
-                          <X className="h-4 w-4" />
-                        </button>
+                        <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
+                          <Clock3 className="h-3.5 w-3.5" />
+                          <span>
+                            {task.start} - {task.end}
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="rounded-full bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-sky-300">
-                          {task.category}
-                        </span>
-                        <span className="text-[11px] text-slate-400">{task.done ? 'Done' : 'Pending'}</span>
-                      </div>
+                      <button className="rounded-lg p-1 text-slate-400 hover:bg-white/5" onClick={() => deleteTask(task.id)}>
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
-                  ))}
 
-                {!tasks.some((task) => task.date === selectedDate) && (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="rounded-full bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-sky-300">
+                        {task.category}
+                      </span>
+                      <span className="text-[11px] text-slate-400">{task.done ? 'Done' : 'Pending'}</span>
+                    </div>
+                  </div>
+                ))}
+
+                {!dayTasks.length && (
                   <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/60 p-4 text-center text-sm text-slate-400">
                     No tasks for this date.
                   </div>
@@ -531,7 +518,7 @@ function CalendarScene({
   view: ViewMode
   onSelect: (date: string) => void
 }) {
-  const groupRef = useRef<THREE.Group>(null)
+  const groupRef = useRef<Group>(null)
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime()
@@ -634,4 +621,3 @@ function priorityColor(priority: TaskPriority) {
 }
 
 export default App
-
