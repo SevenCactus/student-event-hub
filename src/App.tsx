@@ -29,14 +29,14 @@ const guideCards = [
   {
     icon: '🧠',
     title: 'Tiếng Anh chuyên ngành',
-    text: 'Sinh viên ngành Ngôn ngữ & CNTT thường mất thời gian khi đọc tài liệu kỹ thuật, tham gia seminar bằng tiếng Anh và viết báo cáo dự án. Đây là điểm rơi lớn nhất của nhiều bạn mới bắt đầu.',
+    text: 'Sinh viên ngành Ngôn ngữ & CNTT thường mất thời gian khi đọc tài liệu kỹ thuật, tham gia seminar bằng tiếng Anh và viết báo cáo dự án. Đây là điểm mấu chốt giúp bạn giao tiếp chuyên nghiệp trong môi trường công nghệ.',
     color: 'orange',
     tag: 'English for IT',
   },
   {
     icon: '💻',
     title: 'Lập trình & AI',
-    text: 'Việc học code, AI, GitHub và công cụ hỗ trợ vẫn là thách thức lớn đối với sinh viên mới. Cần xây dựng nền tảng kỹ năng từ cơ bản đến nâng cao hợp lý.',
+    text: 'Việc học code, AI, GitHub và công cụ hỗ trợ vẫn là thách thức lớn đối với sinh viên mới. Cần xây dựng nền tảng kỹ năng từ cơ bản đến nâng cao.',
     color: 'purple',
     tag: 'Coding + AI',
   },
@@ -739,8 +739,28 @@ function EventCard({
         </div>
 
         <div className="event-actions">
-          <button className="event-action-btn" type="button" onClick={() => onEdit(event)}>Sửa</button>
-          <button className="event-action-btn delete" type="button" onClick={() => onDelete(event.id, event.title)}>Xóa</button>
+          <button
+            className="event-action-btn"
+            type="button"
+            aria-label={`Sửa sự kiện ${event.title}`}
+            onClick={() => onEdit(event)}
+          >
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M13.76 3.77a1.7 1.7 0 1 1 2.4 2.4l-8.2 8.2-3.2.8.8-3.2 8.2-8.2Zm-8.88 9.78 2.88.72.72 2.88-2.6-2.6-.99-.99Z" fill="currentColor" />
+            </svg>
+            <span>Sửa</span>
+          </button>
+          <button
+            className="event-action-btn delete"
+            type="button"
+            aria-label={`Xóa sự kiện ${event.title}`}
+            onClick={() => onDelete(event.id, event.title)}
+          >
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M6.5 4.5v-1h7v1h3.5v1.5h-1.3l-.9 10.1a1.5 1.5 0 0 1-1.5 1.3H7.2a1.5 1.5 0 0 1-1.5-1.3L4.8 6H3.5V4.5h3Zm1.5 1.5h4.1l.8 9.1H7.2l.8-9.1Zm1.1-2V4h2v.1h-2Z" fill="currentColor" />
+            </svg>
+            <span>Xóa</span>
+          </button>
         </div>
       </div>
 
@@ -777,13 +797,14 @@ function CreateModal({
       <div className="modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal-head">
           <h3>{isEditing ? 'Chỉnh sửa sự kiện' : 'Tạo hoạt động mới'}</h3>
-          <button type="button" onClick={onClose}>✕</button>
+          <button type="button" aria-label="Đóng modal" onClick={onClose}>✕</button>
         </div>
 
         <div className="form-group">
           <label htmlFor="event-name">Tên sự kiện</label>
           <input
             id="event-name"
+            className="form-control"
             value={form.title}
             onChange={(event) => onChange({ ...form, title: event.target.value })}
             placeholder="Ví dụ: Workshop AI & Ngôn ngữ"
@@ -795,6 +816,7 @@ function CreateModal({
           <label htmlFor="event-date">Ngày</label>
           <input
             id="event-date"
+            className="form-control form-date-input"
             type="date"
             value={form.date}
             onChange={(event) => onChange({ ...form, date: event.target.value })}
@@ -806,6 +828,7 @@ function CreateModal({
           <label htmlFor="event-status">Trạng thái</label>
           <select
             id="event-status"
+            className="form-control form-select"
             value={form.status}
             onChange={(event) => onChange({ ...form, status: event.target.value as EventStatus })}
           >
@@ -819,6 +842,7 @@ function CreateModal({
           <label htmlFor="event-people">Số người tham gia</label>
           <input
             id="event-people"
+            className="form-control"
             type="number"
             min={0}
             step={1}
@@ -833,6 +857,7 @@ function CreateModal({
           <label htmlFor="event-progress">Tiến độ (%)</label>
           <input
             id="event-progress"
+            className="form-control"
             type="number"
             min={0}
             max={100}
