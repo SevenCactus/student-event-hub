@@ -1,19 +1,41 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio'
+type EventStatus = 'Đang diễn ra' | 'Chuẩn bị' | 'Sắp tới'
+type EventColor = 'orange' | 'blue' | 'purple'
+
+type EventItem = {
+  id: string
+  title: string
+  date: string
+  status: EventStatus
+  progress: number
+  people: number
+  color: EventColor
+}
+
+type EventFormState = {
+  title: string
+  date: string
+  status: EventStatus
+  people: string
+  progress: string
+}
+
+type EventFormErrors = Partial<Record<keyof EventFormState, string>>
 
 const guideCards = [
   {
     icon: '🧠',
     title: 'Tiếng Anh chuyên ngành',
-    text: 'Sinh viên ngành Ngôn ngữ & CNTT thường mất thời gian khi đọc tài liệu kỹ thuật, tham gia seminar bằng tiếng Anh và viết báo cáo dự án. Đây là điểm yếu lớn cần được rèn luyện liên tục.',
+    text: 'Sinh viên ngành Ngôn ngữ & CNTT thường mất thời gian khi đọc tài liệu kỹ thuật, tham gia seminar bằng tiếng Anh và viết báo cáo dự án. Đây là điểm khởi đầu quan trọng để nâng cao khả năng giao tiếp và nghiên cứu chuyên môn.',
     color: 'orange',
     tag: 'English for IT',
   },
   {
     icon: '💻',
     title: 'Lập trình & AI',
-    text: 'Việc học code, AI, GitHub và công cụ hỗ trợ vẫn là thách thức lớn đối với sinh viên mới. Cần xây dựng nền tảng kỹ năng từ cơ bản đến thực hành dự án.',
+    text: 'Việc học code, AI, GitHub và công cụ hỗ trợ vẫn là thách thức lớn đối với sinh viên mới. Cần xây dựng nền tảng kỹ năng từ cơ bản đến nâng cao theo từng giai đoạn.',
     color: 'purple',
     tag: 'Coding + AI',
   },
@@ -47,10 +69,12 @@ const guideCards = [
   },
 ]
 
-const events = [
-  { title: 'Workshop: English for IT', date: '12 Oct 2026', status: 'Đang diễn ra', progress: 72, people: 32, color: 'orange' },
-  { title: 'Seminar: AI & Ngôn ngữ', date: '18 Oct 2026', status: 'Chuẩn bị', progress: 45, people: 21, color: 'blue' },
-  { title: 'Hackathon: Build Your Portfolio', date: '24 Oct 2026', status: 'Sắp tới', progress: 18, people: 12, color: 'purple' },
+const EVENT_STORAGE_KEY = 'student-event-hub-events-v1'
+
+const defaultEvents: EventItem[] = [
+  { id: 'default-1', title: 'Workshop: English for IT', date: '2026-10-12', status: 'Đang diễn ra', progress: 72, people: 32, color: 'orange' },
+  { id: 'default-2', title: 'Seminar: AI & Ngôn ngữ', date: '2026-10-18', status: 'Chuẩn bị', progress: 45, people: 21, color: 'blue' },
+  { id: 'default-3', title: 'Hackathon: Build Your Portfolio', date: '2026-10-24', status: 'Sắp tới', progress: 18, people: 12, color: 'purple' },
 ]
 
 const tasks = [
@@ -66,15 +90,180 @@ const portfolioItems = [
   { title: 'Case study: English for IT', description: 'Nghiên cứu cách sử dụng tiếng Anh trong môi trường lập trình và công nghệ.', status: 'Chuẩn bị' },
 ]
 
+const emptyForm = (): EventFormState => ({
+  title: '',
+  date: '',
+  status: 'Đang diễn ra',
+  people: '',
+  progress: '',
+})
+
+const getStatusColor = (status: EventStatus): EventColor => {
+  switch (status) {
+    case 'Đang diễn ra':
+      return 'orange'
+    case 'Chuẩn bị':
+      return 'blue'
+    case 'Sắp tới':
+      return 'purple'
+    default:
+      return 'orange'
+  }
+}
+
+const formatEventDate = (value: string): string => {
+  const normalizedValue = value.includes('-') ? value : value.replace(/\//g, '-')
+  const date = new Date(`${normalizedValue}T00:00:00`)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date)
+}
+
+const getInitialEvents = (): EventItem[] => {
+  if (typeof window === 'undefined') {
+    return defaultEvents
+  }
+
+  try {
+    const saved = window.localStorage.getItem(EVENT_STORAGE_KEY)
+
+    if (!saved) {
+      return defaultEvents
+    }
+
+    const parsed = JSON.parse(saved) as EventItem[]
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      return defaultEvents
+    }
+
+    return parsed.map((event) => ({
+      ...event,
+      progress: Number(event.progress),
+      people: Number(event.people),
+      color: getStatusColor(event.status),
+    }))
+  } catch {
+    return defaultEvents
+  }
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('Tổng quan')
   const [showModal, setShowModal] = useState(false)
   const [toast, setToast] = useState('')
   const [search, setSearch] = useState('')
+  const [events, setEvents] = useState<EventItem[]>(getInitialEvents)
+  const [modalForm, setModalForm] = useState<EventFormState>(emptyForm())
+  const [editingEventId, setEditingEventId] = useState<string | null>(null)
+  const [formErrors, setFormErrors] = useState<EventFormErrors>({})
+
+  useEffect(() => {
+    window.localStorage.setItem(EVENT_STORAGE_KEY, JSON.stringify(events))
+  }, [events])
 
   const notify = (message: string) => {
     setToast(message)
     window.setTimeout(() => setToast(''), 2600)
+  }
+
+  const openCreateModal = () => {
+    setEditingEventId(null)
+    setModalForm(emptyForm())
+    setFormErrors({})
+    setShowModal(true)
+  }
+
+  const openEditModal = (event: EventItem) => {
+    setEditingEventId(event.id)
+    setModalForm({
+      title: event.title,
+      date: event.date,
+      status: event.status,
+      people: String(event.people),
+      progress: String(event.progress),
+    })
+    setFormErrors({})
+    setShowModal(true)
+  }
+
+  const closeModal = () => {
+    setShowModal(false)
+    setFormErrors({})
+    setEditingEventId(null)
+  }
+
+  const validateForm = (form: EventFormState): EventFormErrors => {
+    const nextErrors: EventFormErrors = {}
+
+    if (!form.title.trim()) {
+      nextErrors.title = 'Vui lòng nhập tên sự kiện.'
+    }
+
+    if (!form.date) {
+      nextErrors.date = 'Vui lòng chọn ngày diễn ra.'
+    }
+
+    if (form.people.trim() && Number(form.people) < 0) {
+      nextErrors.people = 'Số người tham gia không hợp lệ.'
+    }
+
+    if (form.progress === '' || Number.isNaN(Number(form.progress))) {
+      nextErrors.progress = 'Vui lòng nhập tiến độ.'
+    } else {
+      const progressValue = Number(form.progress)
+      if (progressValue < 0 || progressValue > 100) {
+        nextErrors.progress = 'Tiến độ phải từ 0 đến 100.'
+      }
+    }
+
+    return nextErrors
+  }
+
+  const saveEvent = () => {
+    const errors = validateForm(modalForm)
+    setFormErrors(errors)
+
+    if (Object.keys(errors).length > 0) {
+      return
+    }
+
+    const nextEvent: EventItem = {
+      id: editingEventId ?? `event-${Date.now()}`,
+      title: modalForm.title.trim(),
+      date: modalForm.date,
+      status: modalForm.status,
+      progress: Number(modalForm.progress),
+      people: Number(modalForm.people || 0),
+      color: getStatusColor(modalForm.status),
+    }
+
+    setEvents((currentEvents) => {
+      if (editingEventId) {
+        return currentEvents.map((event) => (event.id === editingEventId ? nextEvent : event))
+      }
+
+      return [nextEvent, ...currentEvents]
+    })
+
+    notify(editingEventId ? 'Đã cập nhật sự kiện thành công' : 'Đã tạo sự kiện mới thành công')
+    closeModal()
+  }
+
+  const deleteEvent = (eventId: string, eventTitle: string) => {
+    if (!window.confirm(`Bạn có chắc muốn xóa sự kiện "${eventTitle}"?`)) {
+      return
+    }
+
+    setEvents((currentEvents) => currentEvents.filter((event) => event.id !== eventId))
+    notify('Đã xóa sự kiện')
   }
 
   return (
@@ -131,26 +320,41 @@ function App() {
           <div className="top-actions">
             <label className="search-box">
               <span>⌕</span>
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm kiếm..." />
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm kiếm..." />
             </label>
-            <button className="primary-btn" onClick={() => setShowModal(true)}>+ Tạo mới</button>
+            <button className="primary-btn" onClick={openCreateModal}>+ Tạo mới</button>
           </div>
         </header>
 
         {activeTab === 'Tổng quan' ? (
-          <Dashboard onCreate={() => setShowModal(true)} onNotify={notify} />
+          <Dashboard
+            events={events}
+            onCreate={openCreateModal}
+            onEdit={openEditModal}
+            onDelete={deleteEvent}
+            onNotify={notify}
+          />
         ) : (
-          <SectionPage tab={activeTab} onCreate={() => setShowModal(true)} onNotify={notify} search={search} />
+          <SectionPage
+            tab={activeTab}
+            events={events}
+            search={search}
+            onCreate={openCreateModal}
+            onEdit={openEditModal}
+            onDelete={deleteEvent}
+            onNotify={notify}
+          />
         )}
       </main>
 
       {showModal && (
         <CreateModal
-          onClose={() => setShowModal(false)}
-          onCreated={() => {
-            setShowModal(false)
-            notify('Đã tạo sự kiện mới thành công')
-          }}
+          form={modalForm}
+          errors={formErrors}
+          isEditing={Boolean(editingEventId)}
+          onChange={setModalForm}
+          onClose={closeModal}
+          onSubmit={saveEvent}
         />
       )}
 
@@ -159,7 +363,19 @@ function App() {
   )
 }
 
-function Dashboard({ onCreate, onNotify }: { onCreate: () => void; onNotify: (s: string) => void }) {
+function Dashboard({
+  events,
+  onCreate,
+  onEdit,
+  onDelete,
+  onNotify,
+}: {
+  events: EventItem[]
+  onCreate: () => void
+  onEdit: (event: EventItem) => void
+  onDelete: (id: string, title: string) => void
+  onNotify: (message: string) => void
+}) {
   return (
     <div className="page">
       <div className="hero-panel">
@@ -176,7 +392,7 @@ function Dashboard({ onCreate, onNotify }: { onCreate: () => void; onNotify: (s:
 
       <div className="stats-grid">
         <Stat icon="◷" title="Nhiệm vụ hôm nay" value="07" note="2 việc cần ưu tiên" tone="orange" />
-        <Stat icon="◉" title="Sự kiện đang theo dõi" value="03" note="1 sự kiện sắp diễn ra" tone="blue" />
+        <Stat icon="◉" title="Sự kiện đang theo dõi" value={String(events.length)} note="1 sự kiện sắp diễn ra" tone="blue" />
         <Stat icon="◈" title="Dự án cá nhân" value="04" note="2 dự án đang hoàn thiện" tone="green" />
       </div>
 
@@ -192,21 +408,7 @@ function Dashboard({ onCreate, onNotify }: { onCreate: () => void; onNotify: (s:
 
           <div className="event-list">
             {events.map((event) => (
-              <button key={event.title} className="event-card" onClick={() => onNotify(`Đang mở sự kiện: ${event.title}`)}>
-                <div className="event-top">
-                  <span className={`dot ${event.color}`} />
-                  <small>{event.status}</small>
-                </div>
-                <h3>{event.title}</h3>
-                <p>{event.date}</p>
-                <div className="progress-bar">
-                  <span style={{ width: `${event.progress}%` }} />
-                </div>
-                <div className="event-meta">
-                  <span>{event.people} người tham gia</span>
-                  <span>{event.progress}%</span>
-                </div>
-              </button>
+              <EventCard key={event.id} event={event} onEdit={onEdit} onDelete={onDelete} />
             ))}
           </div>
         </div>
@@ -300,7 +502,23 @@ function TaskCard({ label, meta, tag, done }: { label: string; meta: string; tag
   )
 }
 
-function SectionPage({ tab, onCreate, onNotify, search }: { tab: Tab; onCreate: () => void; onNotify: (s: string) => void; search: string }) {
+function SectionPage({
+  tab,
+  events,
+  onCreate,
+  onEdit,
+  onDelete,
+  onNotify,
+  search,
+}: {
+  tab: Tab
+  events: EventItem[]
+  onCreate: () => void
+  onEdit: (event: EventItem) => void
+  onDelete: (id: string, title: string) => void
+  onNotify: (message: string) => void
+  search: string
+}) {
   const title =
     tab === 'Sự kiện'
       ? 'Quản lý sự kiện học tập'
@@ -313,6 +531,35 @@ function SectionPage({ tab, onCreate, onNotify, search }: { tab: Tab; onCreate: 
   )
 
   const displayCards = search ? filtered : guideCards
+
+  if (tab === 'Sự kiện') {
+    return (
+      <div className="page">
+        <div className="section-header">
+          <div>
+            <p className="eyebrow">SỰ KIỆN</p>
+            <h1>{title}</h1>
+          </div>
+          <button className="primary-btn" onClick={onCreate}>+ Tạo mới</button>
+        </div>
+
+        <div className="panel section-panel">
+          <div className="panel-head">
+            <div>
+              <h2>Sự kiện của tôi</h2>
+              <p className="muted">Theo dõi và quản lý các sự kiện học tập của bạn</p>
+            </div>
+          </div>
+
+          <div className="event-list">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} onEdit={onEdit} onDelete={onDelete} />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="page">
@@ -371,28 +618,132 @@ function SectionPage({ tab, onCreate, onNotify, search }: { tab: Tab; onCreate: 
   )
 }
 
-function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+function EventCard({
+  event,
+  onEdit,
+  onDelete,
+}: {
+  event: EventItem
+  onEdit: (event: EventItem) => void
+  onDelete: (id: string, title: string) => void
+}) {
+  return (
+    <div className="event-card">
+      <div className="event-card-header">
+        <div className="event-top">
+          <span className={`dot ${event.color}`} />
+          <small>{event.status}</small>
+        </div>
+
+        <div className="event-actions">
+          <button className="event-action-btn" type="button" onClick={() => onEdit(event)}>Sửa</button>
+          <button className="event-action-btn delete" type="button" onClick={() => onDelete(event.id, event.title)}>Xóa</button>
+        </div>
+      </div>
+
+      <h3>{event.title}</h3>
+      <p>{formatEventDate(event.date)}</p>
+      <div className="progress-bar">
+        <span style={{ width: `${Math.min(100, Math.max(0, event.progress))}%` }} />
+      </div>
+      <div className="event-meta">
+        <span>{event.people} người tham gia</span>
+        <span>{event.progress}%</span>
+      </div>
+    </div>
+  )
+}
+
+function CreateModal({
+  form,
+  errors,
+  isEditing,
+  onChange,
+  onClose,
+  onSubmit,
+}: {
+  form: EventFormState
+  errors: EventFormErrors
+  isEditing: boolean
+  onChange: (value: EventFormState) => void
+  onClose: () => void
+  onSubmit: () => void
+}) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal-head">
-          <h3>Tạo hoạt động mới</h3>
-          <button onClick={onClose}>✕</button>
+          <h3>{isEditing ? 'Chỉnh sửa sự kiện' : 'Tạo hoạt động mới'}</h3>
+          <button type="button" onClick={onClose}>✕</button>
         </div>
 
         <div className="form-group">
-          <label>Tên hoạt động</label>
-          <input placeholder="Ví dụ: Workshop AI & Ngôn ngữ" />
+          <label htmlFor="event-name">Tên sự kiện</label>
+          <input
+            id="event-name"
+            value={form.title}
+            onChange={(event) => onChange({ ...form, title: event.target.value })}
+            placeholder="Ví dụ: Workshop AI & Ngôn ngữ"
+          />
+          {errors.title && <small className="field-error">{errors.title}</small>}
         </div>
 
         <div className="form-group">
-          <label>Loại</label>
-          <input placeholder="Sự kiện, workshop, dự án" />
+          <label htmlFor="event-date">Ngày</label>
+          <input
+            id="event-date"
+            type="date"
+            value={form.date}
+            onChange={(event) => onChange({ ...form, date: event.target.value })}
+          />
+          {errors.date && <small className="field-error">{errors.date}</small>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="event-status">Trạng thái</label>
+          <select
+            id="event-status"
+            value={form.status}
+            onChange={(event) => onChange({ ...form, status: event.target.value as EventStatus })}
+          >
+            <option value="Đang diễn ra">Đang diễn ra</option>
+            <option value="Chuẩn bị">Chuẩn bị</option>
+            <option value="Sắp tới">Sắp tới</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="event-people">Số người tham gia</label>
+          <input
+            id="event-people"
+            type="number"
+            min={0}
+            step={1}
+            value={form.people}
+            onChange={(event) => onChange({ ...form, people: event.target.value })}
+            placeholder="0"
+          />
+          {errors.people && <small className="field-error">{errors.people}</small>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="event-progress">Tiến độ (%)</label>
+          <input
+            id="event-progress"
+            type="number"
+            min={0}
+            max={100}
+            step={1}
+            value={form.progress}
+            onChange={(event) => onChange({ ...form, progress: event.target.value })}
+            placeholder="0"
+          />
+          {errors.progress && <small className="field-error">{errors.progress}</small>}
         </div>
 
         <div className="modal-actions">
-          <button className="secondary-btn" onClick={onClose}>Hủy</button>
-          <button className="primary-btn" onClick={onCreated}>Lưu</button>
+          <button type="button" className="secondary-btn" onClick={onClose}>Hủy</button>
+          <button type="button" className="primary-btn" onClick={onSubmit}>{isEditing ? 'Cập nhật' : 'Lưu'}</button>
         </div>
       </div>
     </div>
