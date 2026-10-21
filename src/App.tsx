@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 
-type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio'
+type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio' | 'Lịch của tôi'
 type EventStatus = 'Đang diễn ra' | 'Chuẩn bị' | 'Sắp tới'
 type EventColor = 'orange' | 'blue' | 'purple'
+type EventFilterStatus = 'Tất cả' | EventStatus
 
 type EventItem = {
   id: string
@@ -28,14 +29,14 @@ const guideCards = [
   {
     icon: '🧠',
     title: 'Tiếng Anh chuyên ngành',
-    text: 'Sinh viên ngành Ngôn ngữ & CNTT thường mất thời gian khi đọc tài liệu kỹ thuật, tham gia seminar bằng tiếng Anh và viết báo cáo dự án. Đây là điểm khởi đầu quan trọng để nâng cao khả năng giao tiếp và nghiên cứu chuyên môn.',
+    text: 'Sinh viên ngành Ngôn ngữ & CNTT thường mất thời gian khi đọc tài liệu kỹ thuật, tham gia seminar bằng tiếng Anh và viết báo cáo dự án. Đây là điểm rơi lớn nhất của nhiều bạn mới bắt đầu.',
     color: 'orange',
     tag: 'English for IT',
   },
   {
     icon: '💻',
     title: 'Lập trình & AI',
-    text: 'Việc học code, AI, GitHub và công cụ hỗ trợ vẫn là thách thức lớn đối với sinh viên mới. Cần xây dựng nền tảng kỹ năng từ cơ bản đến nâng cao theo từng giai đoạn.',
+    text: 'Việc học code, AI, GitHub và công cụ hỗ trợ vẫn là thách thức lớn đối với sinh viên mới. Cần xây dựng nền tảng kỹ năng từ cơ bản đến nâng cao hợp lý.',
     color: 'purple',
     tag: 'Coding + AI',
   },
@@ -70,6 +71,7 @@ const guideCards = [
 ]
 
 const EVENT_STORAGE_KEY = 'student-event-hub-events-v1'
+const EVENT_STATUS_FILTERS: EventFilterStatus[] = ['Tất cả', 'Đang diễn ra', 'Chuẩn bị', 'Sắp tới']
 
 const defaultEvents: EventItem[] = [
   { id: 'default-1', title: 'Workshop: English for IT', date: '2026-10-12', status: 'Đang diễn ra', progress: 72, people: 32, color: 'orange' },
@@ -125,6 +127,8 @@ const formatEventDate = (value: string): string => {
     year: 'numeric',
   }).format(date)
 }
+
+const normalizeText = (value: string): string => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
 const getInitialEvents = (): EventItem[] => {
   if (typeof window === 'undefined') {
@@ -300,7 +304,10 @@ function App() {
           ))}
 
           <p className="nav-label space">Cá nhân</p>
-          <button className="nav-item" onClick={() => notify('Tính năng lịch đang được phát triển')}><span>□</span>Lịch của tôi</button>
+          <button className={`nav-item ${activeTab === 'Lịch của tôi' ? 'active' : ''}`} onClick={() => setActiveTab('Lịch của tôi')}>
+            <span>□</span>
+            Lịch của tôi
+          </button>
           <button className="nav-item" onClick={() => notify('Đã mở phần cơ hội')}><span>♢</span>Cơ hội</button>
         </nav>
 
@@ -416,8 +423,8 @@ function Dashboard({
         <div className="panel">
           <div className="panel-head">
             <div>
-              <h2>Khó khăn thực tế</h2>
-              <p className="muted">Những vấn đề thường gặp của sinh viên Ngôn ngữ & CNTT</p>
+              <h2>Những câu hỏi thường gặp</h2>
+              <p className="muted">Gợi ý nhanh cho quá trình học tập và nghề nghiệp</p>
             </div>
           </div>
 
@@ -519,18 +526,30 @@ function SectionPage({
   onNotify: (message: string) => void
   search: string
 }) {
+  const [eventSearch, setEventSearch] = useState('')
+  const [eventStatusFilter, setEventStatusFilter] = useState<EventFilterStatus>('Tất cả')
+
   const title =
     tab === 'Sự kiện'
       ? 'Quản lý sự kiện học tập'
       : tab === 'Cẩm nang'
         ? 'Cẩm nang sinh viên Ngôn ngữ & CNTT'
-        : 'Portfolio & kết quả học tập'
+        : tab === 'Lịch của tôi'
+          ? 'Lịch của tôi'
+          : 'Portfolio & kết quả học tập'
 
-  const filtered = guideCards.filter(
-    (item) => item.title.toLowerCase().includes(search.toLowerCase()) || item.text.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredGuideCards = guideCards.filter((item) => {
+    const haystack = normalizeText(`${item.title} ${item.text}`)
+    return haystack.includes(normalizeText(search))
+  })
 
-  const displayCards = search ? filtered : guideCards
+  const displayCards = search ? filteredGuideCards : guideCards
+
+  const filteredEvents = events.filter((event) => {
+    const matchesStatus = eventStatusFilter === 'Tất cả' || event.status === eventStatusFilter
+    const matchesSearch = !eventSearch || normalizeText(event.title).includes(normalizeText(eventSearch))
+    return matchesStatus && matchesSearch
+  })
 
   if (tab === 'Sự kiện') {
     return (
@@ -551,9 +570,116 @@ function SectionPage({
             </div>
           </div>
 
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '18px', alignItems: 'center' }}>
+            <label className="search-box" style={{ flex: '1 1 220px', minWidth: '220px', maxWidth: '360px' }}>
+              <span>⌕</span>
+              <input
+                value={eventSearch}
+                onChange={(event) => setEventSearch(event.target.value)}
+                placeholder="Tìm kiếm sự kiện theo tên..."
+              />
+            </label>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {EVENT_STATUS_FILTERS.map((status) => {
+                const isSelected = status === eventStatusFilter
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => setEventStatusFilter(status)}
+                    style={{
+                      border: '1px solid rgba(148, 163, 184, 0.4)',
+                      borderRadius: '999px',
+                      padding: '8px 12px',
+                      background: isSelected ? '#1d4ed8' : '#f8fafc',
+                      color: isSelected ? '#fff' : '#1f2937',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {status}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           <div className="event-list">
-            {events.map((event) => (
+            {filteredEvents.length === 0 ? (
+              <div className="empty-state" style={{ padding: '18px', color: '#64748b' }}>
+                Không có sự kiện nào phù hợp với bộ lọc hiện tại.
+              </div>
+            ) : (
+              filteredEvents.map((event) => (
+                <EventCard key={event.id} event={event} onEdit={onEdit} onDelete={onDelete} />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (tab === 'Lịch của tôi') {
+    const orderedEvents = [...events].sort((first, second) => new Date(first.date).getTime() - new Date(second.date).getTime())
+
+    return (
+      <div className="page">
+        <div className="section-header">
+          <div>
+            <p className="eyebrow">LỊCH</p>
+            <h1>{title}</h1>
+          </div>
+          <button className="primary-btn" onClick={onCreate}>+ Tạo mới</button>
+        </div>
+
+        <div className="panel section-panel">
+          <div className="panel-head">
+            <div>
+              <h2>Danh sách sự kiện của tôi</h2>
+              <p className="muted">Tất cả việc đã tạo và lưu trong hệ thống được hiển thị ở đây</p>
+            </div>
+          </div>
+
+          <div className="event-list">
+            {orderedEvents.map((event) => (
               <EventCard key={event.id} event={event} onEdit={onEdit} onDelete={onDelete} />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (tab === 'Cẩm nang') {
+    return (
+      <div className="page">
+        <div className="section-header">
+          <div>
+            <p className="eyebrow">CẨM NANG</p>
+            <h1>{title}</h1>
+          </div>
+          <button className="primary-btn" onClick={onCreate}>+ Tạo mới</button>
+        </div>
+
+        <div className="panel section-panel">
+          <div className="section-intro">
+            <h2>Khó khăn thực tế của sinh viên ngành Ngôn ngữ & Công nghệ thông tin</h2>
+            <p className="muted">
+              Đây là những vấn đề mà sinh viên thường gặp trong quá trình học tập và phát triển nghề nghiệp: mất cân bằng kỹ năng,
+              áp lực mới với công nghệ, khả năng giao tiếp bằng tiếng Anh và việc xây dựng hồ sơ năng lực cá nhân.
+            </p>
+          </div>
+
+          <div className="guide-grid full">
+            {displayCards.map((card) => (
+              <div key={card.title} className={`guide-card ${card.color}`}>
+                <span>{card.icon}</span>
+                <h3>{card.title}</h3>
+                <p>{card.text}</p>
+                <small>{card.tag}</small>
+              </div>
             ))}
           </div>
         </div>
@@ -572,48 +698,25 @@ function SectionPage({
       </div>
 
       <div className="panel section-panel">
-        <div className="section-intro">
-          <h2>Khó khăn thực tế của sinh viên ngành Ngôn ngữ & Công nghệ thông tin</h2>
-          <p className="muted">
-            Đây là những vấn đề mà sinh viên thường gặp trong quá trình học tập và phát triển nghề nghiệp: mất cân bằng kỹ năng,
-            áp lực mới với công nghệ, khả năng giao tiếp bằng tiếng Anh và việc xây dựng hồ sơ năng lực cá nhân.
-          </p>
+        <div className="panel-head">
+          <div>
+            <h2>Gợi ý nâng cấp hồ sơ</h2>
+            <p className="muted">Bạn có thể xây dựng hồ sơ sáng tạo và chuyên nghiệp hơn</p>
+          </div>
         </div>
 
-        <div className="guide-grid full">
-          {displayCards.map((card) => (
-            <div key={card.title} className={`guide-card ${card.color}`}>
-              <span>{card.icon}</span>
-              <h3>{card.title}</h3>
-              <p>{card.text}</p>
-              <small>{card.tag}</small>
+        <div className="portfolio-list">
+          {portfolioItems.map((item) => (
+            <div key={item.title} className="portfolio-item">
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </div>
+              <span className="status-pill">{item.status}</span>
             </div>
           ))}
         </div>
       </div>
-
-      {tab === 'Portfolio' && (
-        <div className="panel section-panel">
-          <div className="panel-head">
-            <div>
-              <h2>Gợi ý nâng cấp hồ sơ</h2>
-              <p className="muted">Bạn có thể xây dựng hồ sơ sáng tạo và chuyên nghiệp hơn</p>
-            </div>
-          </div>
-
-          <div className="portfolio-list">
-            {portfolioItems.map((item) => (
-              <div key={item.title} className="portfolio-item">
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                </div>
-                <span className="status-pill">{item.status}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
