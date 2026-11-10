@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import AuthPage from './AuthPage'
 
 type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio' | 'Lịch của tôi'
 type EventStatus = 'Đang diễn ra' | 'Chuẩn bị' | 'Sắp tới'
@@ -160,6 +161,7 @@ const getInitialEvents = (): EventItem[] => {
 }
 
 function App() {
+  const [showAuth, setShowAuth] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('Tổng quan')
   const [showModal, setShowModal] = useState(false)
   const [toast, setToast] = useState('')
@@ -270,13 +272,17 @@ function App() {
     notify('Đã xóa sự kiện')
   }
 
+  if (showAuth) {
+    return <AuthPage onExplore={() => setShowAuth(false)} />
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand-wrap">
           <div className="brand-mark">✦</div>
           <div>
-            <div className="brand-name">Lang<span>IT</span></div>
+            <div className="brand-name">LEEP<span>.</span></div>
             <small>Ngôn ngữ & CNTT</small>
           </div>
         </div>
@@ -315,7 +321,7 @@ function App() {
           <span>💡</span>
           <div>
             <b>Cần hỗ trợ?</b>
-            <small>Xem hướng dẫn sử dụng Hub</small>
+            <small>Xem hướng dẫn sử dụng LEEP</small>
           </div>
           <button onClick={() => notify('Đã mở hướng dẫn hỗ trợ')}>Mở</button>
         </div>
@@ -330,6 +336,7 @@ function App() {
               <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm kiếm..." />
             </label>
             <button className="primary-btn" onClick={openCreateModal}>+ Tạo mới</button>
+            <button className="secondary-btn" onClick={() => setShowAuth(true)}>Đăng nhập</button>
           </div>
         </header>
 
