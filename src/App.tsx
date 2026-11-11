@@ -7,8 +7,12 @@ import { guideCards } from './guides/guideData'
 import GuideModal from './guides/GuideModal'
 import ActivityDecisionTool from './guide-tools/ActivityDecisionTool'
 import WeeklyTimeBudgetTool from './guide-tools/WeeklyTimeBudgetTool'
+import TodoManager from './todos/TodoManager'
+import AiAssistantModal from './assistant/AiAssistantModal'
 import './guides/guides.css'
 import './guide-tools/guideTools.css'
+import './todos/todos.css'
+import './assistant/assistant.css'
 
 type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio' | 'Lịch của tôi'
 type EventStatus = 'Đang diễn ra' | 'Chuẩn bị' | 'Sắp tới'
@@ -42,13 +46,6 @@ const defaultEvents: EventItem[] = [
   { id: 'default-1', title: 'Workshop: English for IT', date: '2026-10-12', status: 'Đang diễn ra', progress: 72, people: 32, color: 'orange' },
   { id: 'default-2', title: 'Seminar: AI & Ngôn ngữ', date: '2026-10-18', status: 'Chuẩn bị', progress: 45, people: 21, color: 'blue' },
   { id: 'default-3', title: 'Hackathon: Build Your Portfolio', date: '2026-10-24', status: 'Sắp tới', progress: 18, people: 12, color: 'purple' },
-]
-
-const tasks = [
-  { label: 'Hoàn thiện portfolio dự án AI', meta: 'Hôm nay • 2h', tag: 'Portfolio', done: true },
-  { label: 'Luyện IELTS chuyên ngành CNTT', meta: '2:00 PM • 45 phút', tag: 'Tiếng Anh', done: false },
-  { label: 'Chuẩn bị slide thuyết trình nhóm', meta: 'Tuần này • 1 bài', tag: 'Nhóm', done: false },
-  { label: 'Nộp bài tập ngôn ngữ học số', meta: 'Hạn chót 18:00', tag: 'Học tập', done: false },
 ]
 
 const portfolioItems = [
@@ -131,6 +128,7 @@ function App() {
   const [showModal, setShowModal] = useState(false)
   const [selectedGuide, setSelectedGuide] = useState<GuideCardItem | null>(null)
   const [activeTool, setActiveTool] = useState<'activity_decision' | 'time_budget' | null>(null)
+  const [showAssistant, setShowAssistant] = useState(false)
   const [toast, setToast] = useState('')
   const [search, setSearch] = useState('')
   const [events, setEvents] = useState<EventItem[]>(getInitialEvents)
@@ -422,13 +420,13 @@ function App() {
           <button className="nav-item" onClick={() => notify('Đã mở phần cơ hội')}><span>♢</span>Cơ hội</button>
         </nav>
 
-        <div className="help-card">
+        <div className="help-card" onClick={() => setShowAssistant(true)} style={{ cursor: 'pointer' }}>
           <span>💡</span>
           <div>
             <b>Cần hỗ trợ?</b>
-            <small>Xem hướng dẫn sử dụng LEEP</small>
+            <small>Trò chuyện với Trợ lý AI LEEP</small>
           </div>
-          <button onClick={() => notify('Đã mở hướng dẫn hỗ trợ')}>Mở</button>
+          <button onClick={(e) => { e.stopPropagation(); setShowAssistant(true); }}>Mở</button>
         </div>
       </aside>
 
@@ -517,6 +515,15 @@ function App() {
             <WeeklyTimeBudgetTool onClose={() => setActiveTool(null)} />
           </div>
         </div>
+      )}
+
+      {showAssistant && (
+        <AiAssistantModal
+          onClose={() => setShowAssistant(false)}
+          onNavigateTab={(tab) => {
+            setActiveTab(tab)
+          }}
+        />
       )}
 
       {toast && <div className="toast">✓ &nbsp; {toast}</div>}
@@ -629,41 +636,8 @@ function Dashboard({
         </div>
       </div>
 
-      <div className="content-grid lower-grid">
-        <div className="panel tasks-panel">
-          <div className="panel-head">
-            <div>
-              <h2>Việc cần làm</h2>
-              <p className="muted">Bạn có 4 nhiệm vụ trong tuần này</p>
-            </div>
-            <button className="link-btn" onClick={() => onNotify('Đã mở mục việc cần làm')}>Quản lý</button>
-          </div>
-
-          {tasks.map((task) => (
-            <TaskCard key={task.label} label={task.label} meta={task.meta} tag={task.tag} done={task.done} />
-          ))}
-        </div>
-
-        <div className="panel">
-          <div className="panel-head">
-            <div>
-              <h2>Portfolio</h2>
-              <p className="muted">Các dự án bạn đang xây dựng để chứng minh năng lực</p>
-            </div>
-          </div>
-
-          <div className="portfolio-list">
-            {portfolioItems.map((item) => (
-              <div key={item.title} className="portfolio-item">
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                </div>
-                <span className="status-pill">{item.status}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div style={{ marginTop: '24px', width: '100%' }}>
+        <TodoManager />
       </div>
     </div>
   )
@@ -678,21 +652,6 @@ function Stat({ icon, title, value, note, tone }: { icon: string; title: string;
         <p>{title}</p>
         <small>{note}</small>
       </div>
-    </div>
-  )
-}
-
-function TaskCard({ label, meta, tag, done }: { label: string; meta: string; tag: string; done: boolean }) {
-  const [checked, setChecked] = useState(done)
-
-  return (
-    <div className={`task-row ${checked ? 'done' : ''}`}>
-      <button className={`check-btn ${checked ? 'on' : ''}`} onClick={() => setChecked(!checked)}>{checked ? '✓' : ''}</button>
-      <div className="task-content">
-        <strong>{label}</strong>
-        <small>{meta}</small>
-      </div>
-      <span className="task-tag">{tag}</span>
     </div>
   )
 }
