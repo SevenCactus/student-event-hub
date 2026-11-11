@@ -522,6 +522,21 @@ function App() {
         />
       )}
 
+      {/* Floating AI Launcher in Bottom-Right Corner (Replaces the black Elfsight widget) */}
+      {!showAssistant && (
+        <button
+          type="button"
+          className="ai-floating-trigger"
+          onClick={() => setShowAssistant(true)}
+          aria-label="Mở Trợ lý AI LEEP"
+          title="Trò chuyện với Trợ lý AI LEEP"
+        >
+          <span className="ai-trigger-icon">🤖</span>
+          <span className="ai-trigger-label">Trợ lý AI LEEP</span>
+          <span className="ai-trigger-badge">Online</span>
+        </button>
+      )}
+
       {toast && <div className="toast">✓ &nbsp; {toast}</div>}
     </div>
   )
