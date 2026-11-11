@@ -433,10 +433,6 @@ function App() {
         <header className="topbar">
           <div className="breadcrumbs">Workspace <span>/</span> <b>{activeTab}</b></div>
           <div className="top-actions">
-            <label className="search-box">
-              <span>⌕</span>
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm kiếm..." />
-            </label>
             <button className="primary-btn" onClick={openCreateModal}>+ Tạo mới</button>
             <button className="secondary-btn" onClick={() => setShowAuth(true)}>Đăng nhập</button>
           </div>
