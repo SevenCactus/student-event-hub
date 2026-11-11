@@ -42,8 +42,8 @@ export default function AuthPage({ onExplore }: { onExplore: () => void }) {
       form.reset()
       setShowPassword(false)
       setNotice(isRegister
-        ? 'Thông tin hợp lệ. Để lưu tài khoản vào cơ sở dữ liệu Supabase, hãy dán VITE_SUPABASE_ANON_KEY vào file .env. Bạn có thể nhấn "Trải nghiệm LEEP" để dùng thử ngay.'
-        : 'Chưa phát hiện VITE_SUPABASE_ANON_KEY trong .env. Bạn có thể nhấn "Trải nghiệm LEEP" bên dưới để dùng thử.')
+        ? 'Thông tin hợp lệ. Để lưu tài khoản vào cơ sở dữ liệu Supabase, hãy dán VITE_SUPABASE_ANON_KEY vào file .env. Bạn có thể nhấn "Trải nghiệm Omni-Freshmen" để dùng thử ngay.'
+        : 'Chưa phát hiện VITE_SUPABASE_ANON_KEY trong .env. Bạn có thể nhấn "Trải nghiệm Omni-Freshmen" bên dưới để dùng thử.')
       return
     }
 
@@ -84,16 +84,16 @@ export default function AuthPage({ onExplore }: { onExplore: () => void }) {
 
   return (
     <main className="auth-page">
-      <section className="auth-story" aria-label="Giới thiệu LEEP">
-        <a className="auth-brand" href="#" onClick={(event) => { event.preventDefault(); onExplore() }} aria-label="Khám phá LEEP">
+      <section className="auth-story" aria-label="Giới thiệu Omni-Freshmen">
+        <a className="auth-brand" href="#" onClick={(event) => { event.preventDefault(); onExplore() }} aria-label="Khám phá Omni-Freshmen">
           <span className="brand-mark" aria-hidden="true">✦</span>
-          <span>LEEP<span className="auth-brand-dot">.</span></span>
+          <span>Omni-Freshmen<span className="auth-brand-dot">.</span></span>
         </a>
 
         <div className="auth-story-content">
           <p className="auth-kicker"><span /> KHÔNG GIAN PHÁT TRIỂN CỦA BẠN</p>
           <h1>Một bước nhỏ.<br /><span>Một hành trình lớn.</span></h1>
-          <p className="auth-story-description">Kết nối với sự kiện, trau dồi kỹ năng và viết tiếp câu chuyện của riêng bạn cùng LEEP.</p>
+          <p className="auth-story-description">Kết nối với sự kiện, trau dồi kỹ năng và viết tiếp câu chuyện của riêng bạn cùng Omni-Freshmen.</p>
 
           <div className="auth-preview" aria-hidden="true">
             <div className="auth-preview-heading"><span>GÓC CỦA BẠN</span><span>↗</span></div>
@@ -107,14 +107,14 @@ export default function AuthPage({ onExplore }: { onExplore: () => void }) {
           </div>
         </div>
 
-        <div className="auth-story-footer"><span className="auth-footer-spark">✦</span><p>Học hỏi. Kết nối. Tiến xa hơn.</p><span>LEEP / SINH VIÊN</span></div>
+        <div className="auth-story-footer"><span className="auth-footer-spark">✦</span><p>Học hỏi. Kết nối. Tiến xa hơn.</p><span>OMNI-FRESHMEN / SINH VIÊN</span></div>
       </section>
 
       <section className="auth-form-panel" aria-labelledby="auth-title">
-        <button className="auth-explore-top" type="button" onClick={onExplore}>Khám phá LEEP <span aria-hidden="true">↗</span></button>
+        <button className="auth-explore-top" type="button" onClick={onExplore}>Khám phá Omni-Freshmen <span aria-hidden="true">↗</span></button>
         <div className="auth-form-wrap">
           <div className="auth-form-icon" aria-hidden="true">{isRegister ? '✦' : '↗'}</div>
-          <p className="auth-form-eyebrow">{isRegister ? 'BẮT ĐẦU CÙNG LEEP' : 'CHÀO MỪNG ĐẾN VỚI LEEP'}</p>
+          <p className="auth-form-eyebrow">{isRegister ? 'BẮT ĐẦU CÙNG OMNI-FRESHMEN' : 'CHÀO MỪNG ĐẾN VỚI OMNI-FRESHMEN'}</p>
           <h2 id="auth-title">{isRegister ? 'Tạo tài khoản mới' : 'Sẵn sàng tiến xa hơn?'}</h2>
           <p className="auth-form-description">{isRegister ? 'Một nơi cho những ý tưởng, mục tiêu và bước tiến của bạn.' : 'Đăng nhập để tiếp tục hành trình học tập và kết nối của bạn.'}</p>
 
@@ -159,10 +159,10 @@ export default function AuthPage({ onExplore }: { onExplore: () => void }) {
 
           <p className="auth-switch-prompt">{isRegister ? 'Bạn đã có tài khoản?' : 'Bạn chưa có tài khoản?'} <button type="button" onClick={() => switchMode(isRegister ? 'login' : 'register')}>{isRegister ? 'Đăng nhập' : 'Đăng ký ngay'}</button></p>
           <div className="auth-divider"><span>hoặc bắt đầu khám phá</span></div>
-          <button className="secondary-btn auth-guest" type="button" onClick={onExplore}>Trải nghiệm LEEP <span aria-hidden="true">↗</span></button>
+          <button className="secondary-btn auth-guest" type="button" onClick={onExplore}>Trải nghiệm Omni-Freshmen <span aria-hidden="true">↗</span></button>
           <p className="auth-preview-note" id="auth-preview-note">Bản xem thử giao diện. Chưa kết nối tài khoản; thông tin đăng nhập không được lưu hoặc gửi đi.</p>
         </div>
-        <p className="auth-copyright">LEEP · Không gian dành cho những bước tiến mới.</p>
+        <p className="auth-copyright">Omni-Freshmen · Không gian dành cho những bước tiến mới.</p>
       </section>
     </main>
   )

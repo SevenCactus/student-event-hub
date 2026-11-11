@@ -359,7 +359,7 @@ function App() {
         <div className="brand-wrap">
           <div className="brand-mark">✦</div>
           <div>
-            <div className="brand-name">LEEP<span>.</span></div>
+            <div className="brand-name">Omni-Freshmen<span>.</span></div>
             <small>Ngôn ngữ & CNTT</small>
           </div>
         </div>
@@ -423,7 +423,7 @@ function App() {
           <span>💡</span>
           <div>
             <b>Cần hỗ trợ?</b>
-            <small>Trò chuyện với Trợ lý AI LEEP</small>
+            <small>Trò chuyện với Trợ lý AI Omni-Freshmen</small>
           </div>
           <button onClick={(e) => { e.stopPropagation(); setShowAssistant(true); }}>Mở</button>
         </div>
@@ -522,17 +522,17 @@ function App() {
         />
       )}
 
-      {/* Floating AI Launcher in Bottom-Right Corner (Replaces the black Elfsight widget) */}
+      {/* Floating AI Launcher in Bottom-Left Corner */}
       {!showAssistant && (
         <button
           type="button"
           className="ai-floating-trigger"
           onClick={() => setShowAssistant(true)}
-          aria-label="Mở Trợ lý AI LEEP"
-          title="Trò chuyện với Trợ lý AI LEEP"
+          aria-label="Mở Trợ lý AI Omni-Freshmen"
+          title="Trò chuyện với Trợ lý AI Omni-Freshmen"
         >
           <span className="ai-trigger-icon">🤖</span>
-          <span className="ai-trigger-label">Trợ lý AI LEEP</span>
+          <span className="ai-trigger-label">Trợ lý AI Omni-Freshmen</span>
           <span className="ai-trigger-badge">Online</span>
         </button>
       )}

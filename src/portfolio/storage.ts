@@ -72,7 +72,7 @@ export const defaultInitialPortfolio: PortfolioData = {
       id: 'act-1',
       title: 'Hackathon: Build Your Portfolio',
       role: 'Thành viên tham dự',
-      organization: 'CLB Công nghệ LEEP',
+      organization: 'CLB Công nghệ Omni-Freshmen',
       startDate: '2026-10',
       endDate: '2026-10',
       description: 'Phát triển dự án hồ sơ cá nhân và tranh tài thiết kế giao diện tối ưu cho sinh viên.',

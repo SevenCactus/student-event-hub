@@ -18,7 +18,7 @@ const SMART_REPLIES: Record<string, string> = {
   gpa: 'Để giữ GPA vững mà vẫn trải nghiệm, quy tắc số 1 là xác định "Ngưỡng điểm an toàn" (thường 2.8 - 3.2 tùy học bổng). Khi nhận bất kỳ hoạt động nào, hãy dùng "Bảng kiểm 5 tiêu chí" trong Cẩm nang. Nếu môn học đang dưới 6.5, hãy dũng cảm giảm bớt 1 buổi sinh hoạt CLB nhé!',
   star: 'Mẫu STAR gồm 4 bước: (1) S - Situation (Bối cảnh bài toán), (2) T - Task (Nhiệm vụ cụ thể bạn đảm nhận), (3) A - Action (Bạn đã dùng công nghệ, kỹ năng gì để giải quyết), (4) R - Result (Kết quả đo lường được bằng số liệu). Bạn có thể sang tab Portfolio để điền trực tiếp vào form!',
   deadline: 'Khi dồn deadline, hãy áp dụng kỹ thuật "Ma trận khẩn cấp": (1) Liệt kê toàn bộ ra danh sách Việc cần làm ở Trang chính, (2) Xếp thứ tự môn có hệ số điểm cao trước, (3) Chia nhỏ mỗi bài thành các mốc 45 phút Pomodoro. Đừng quên giữ tối thiểu 6-7 giờ ngủ để không bị sập nguồn!',
-  namnhat: 'Theo khảo sát của LEEP trên 120 sinh viên, kỳ 1 năm nhất bạn nên ưu tiên làm quen nhịp học đại học và tạo nhóm học tập tốt. Bạn chưa cần vội đi làm thêm ngay; kỳ 2 hoặc năm 2 khi GPA đã ổn định sẽ là thời điểm vàng để bắt đầu thực tập bán thời gian!',
+  namnhat: 'Theo khảo sát của Omni-Freshmen trên 120 sinh viên, kỳ 1 năm nhất bạn nên ưu tiên làm quen nhịp học đại học và tạo nhóm học tập tốt. Bạn chưa cần vội đi làm thêm ngay; kỳ 2 hoặc năm 2 khi GPA đã ổn định sẽ là thời điểm vàng để bắt đầu thực tập bán thời gian!',
 }
 
 export default function AiAssistantModal({
@@ -32,7 +32,7 @@ export default function AiAssistantModal({
     {
       id: 'welcome',
       sender: 'assistant',
-      text: 'Chào bạn! Mình là Trợ lý AI học tập LEEP (Freshman AI Assistant). Mình có thể hỗ trợ bạn lên kế hoạch học tập, gỡ rối deadline, hoặc hướng dẫn xây dựng Portfolio. Bạn đang cần hỗ trợ điều gì hôm nay?',
+      text: 'Chào bạn! Mình là Trợ lý AI học tập Omni-Freshmen (Freshman AI Assistant). Mình có thể hỗ trợ bạn lên kế hoạch học tập, gỡ rối deadline, hoặc hướng dẫn xây dựng Portfolio. Bạn đang cần hỗ trợ điều gì hôm nay?',
       time: 'Vừa xong',
     },
   ])
@@ -88,7 +88,7 @@ export default function AiAssistantModal({
           <div className="ai-modal-title-group">
             <div className="ai-bot-avatar">🤖</div>
             <div>
-              <h3>Trợ lý AI LEEP (Freshman Assistant)</h3>
+              <h3>Trợ lý AI Omni-Freshmen (Freshman Assistant)</h3>
               <p>Hỗ trợ học tập, định hướng và cân bằng trải nghiệm sinh viên</p>
             </div>
           </div>

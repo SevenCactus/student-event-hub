@@ -204,7 +204,7 @@ export default function PortfolioManager({ events = [], onNotify }: Props) {
     setIsUnsaved(false)
     setSaveStatusText('saved')
     if (onNotify) {
-      onNotify('Đã nạp lại hồ sơ mẫu LEEP.')
+      onNotify('Đã nạp lại hồ sơ mẫu Omni-Freshmen.')
     }
   }
 
@@ -223,7 +223,7 @@ export default function PortfolioManager({ events = [], onNotify }: Props) {
       <div className="portfolio-header-bar">
         <div>
           <h1>Hồ Sơ Năng Lực Sinh Viên (Portfolio)</h1>
-          <p>Xây dựng hồ sơ học thuật, kỹ năng và dự án chuyên nghiệp dành cho sinh viên LEEP</p>
+          <p>Xây dựng hồ sơ học thuật, kỹ năng và dự án chuyên nghiệp dành cho sinh viên Omni-Freshmen</p>
         </div>
 
         <div className="portfolio-actions-group">

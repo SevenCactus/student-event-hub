@@ -105,7 +105,7 @@ export const guideCards: GuideCardItem[] = [
     relatedTool: {
       type: 'portfolio',
       label: 'Chuyển sang trang Tạo Portfolio ↗',
-      description: 'Xây dựng hồ sơ năng lực trực quan theo mẫu chuẩn sinh viên LEEP.',
+      description: 'Xây dựng hồ sơ năng lực trực quan theo mẫu chuẩn sinh viên Omni-Freshmen.',
     },
   },
   {

@@ -33,7 +33,7 @@ export function exportPortfolioPdf(studentName?: string): { ok: boolean; message
 
   const safeTitle = (studentName || '').trim()
     ? `Portfolio - ${studentName!.trim()}`
-    : 'Ho-so-Portfolio-LEEP'
+    : 'Ho-so-Portfolio-Omni-Freshmen'
 
   const html = `<!DOCTYPE html>
 <html lang="vi">

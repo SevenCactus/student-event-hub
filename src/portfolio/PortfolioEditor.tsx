@@ -33,7 +33,7 @@ const SECTIONS = [
   { id: 'education', errorPrefix: 'education.', title: 'Học vấn & Đào tạo', icon: '🎓', desc: 'Trường lớp, chuyên ngành và GPA' },
   { id: 'skills', errorPrefix: 'skills.', title: 'Kỹ năng sinh viên', icon: '⚡', desc: 'Chuyên môn, kỹ năng mềm & ngoại ngữ' },
   { id: 'projects', errorPrefix: 'projects.', title: 'Dự án nổi bật', icon: '🚀', desc: 'Sản phẩm, code, demo & vai trò' },
-  { id: 'activities', errorPrefix: 'activities.', title: 'Hoạt động & Sự kiện', icon: '🤝', desc: 'Hoạt động phong trào hoặc sự kiện LEEP' },
+  { id: 'activities', errorPrefix: 'activities.', title: 'Hoạt động & Sự kiện', icon: '🤝', desc: 'Hoạt động phong trào hoặc sự kiện Omni-Freshmen' },
   { id: 'certificates', errorPrefix: 'certificates.', title: 'Chứng chỉ & Giải thưởng', icon: '🏆', desc: 'Chứng nhận năng lực chuyên môn' },
   { id: 'social', errorPrefix: 'socialLinks.', title: 'Liên kết mạng xã hội', icon: '🌐', desc: 'LinkedIn, GitHub, Facebook, Website' },
 ]
@@ -278,7 +278,7 @@ export default function PortfolioEditor({ data, errors, onChange, events = [] }:
       id: `act-event-${Date.now()}`,
       title: ev.title,
       role: 'Thành viên tham dự',
-      organization: 'Hệ thống sự kiện LEEP',
+      organization: 'Hệ thống sự kiện Omni-Freshmen',
       startDate: monthFormatted,
       endDate: monthFormatted,
       description: `Đã tham gia sự kiện "${ev.title}" (Ngày: ${ev.date} • Trạng thái: ${ev.status}).`,
@@ -1079,7 +1079,7 @@ export default function PortfolioEditor({ data, errors, onChange, events = [] }:
             <div className="portfolio-section-icon" aria-hidden="true">🤝</div>
             <div>
               <h2 className="portfolio-section-title">6. Hoạt động & Sự kiện đã tham gia ({data.activities.length})</h2>
-              <p className="portfolio-section-desc">Workshop, seminar, hoạt động tình nguyện hoặc chọn từ sự kiện LEEP</p>
+              <p className="portfolio-section-desc">Workshop, seminar, hoạt động tình nguyện hoặc chọn từ sự kiện Omni-Freshmen</p>
             </div>
           </div>
           <span className="portfolio-chevron" aria-hidden="true">▼</span>
@@ -1096,7 +1096,7 @@ export default function PortfolioEditor({ data, errors, onChange, events = [] }:
                   aria-expanded={showEventSelector}
                   onClick={() => setShowEventSelector(!showEventSelector)}
                 >
-                  ⚡ Chọn nhanh từ sự kiện LEEP có sẵn ({events.length} sự kiện)
+                  ⚡ Chọn nhanh từ sự kiện Omni-Freshmen có sẵn ({events.length} sự kiện)
                 </button>
 
                 {showEventSelector && (
@@ -1131,7 +1131,7 @@ export default function PortfolioEditor({ data, errors, onChange, events = [] }:
 
             <div className="portfolio-items-list">
               {data.activities.length === 0 && (
-                <p className="portfolio-empty-hint">Chưa có hoạt động nào. Bạn có thể thêm thủ công hoặc chọn từ sự kiện LEEP phía trên.</p>
+                <p className="portfolio-empty-hint">Chưa có hoạt động nào. Bạn có thể thêm thủ công hoặc chọn từ sự kiện Omni-Freshmen phía trên.</p>
               )}
               {data.activities.map((act, idx) => (
                 <div key={act.id} className="portfolio-sub-card">
@@ -1201,7 +1201,7 @@ export default function PortfolioEditor({ data, errors, onChange, events = [] }:
                         id={`act-org-${act.id}`}
                         className="portfolio-input"
                         value={act.organization || ''}
-                        placeholder="CLB Công nghệ LEEP..."
+                        placeholder="CLB Công nghệ Omni-Freshmen..."
                         onChange={(e) => updateActivity(act.id, 'organization', e.target.value)}
                       />
                     </div>
