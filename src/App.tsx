@@ -4,7 +4,11 @@ import { supabase, isSupabaseConfigured } from './lib/supabase'
 import PortfolioManager from './portfolio/PortfolioManager'
 import { GuideCardItem } from './guides/types'
 import { guideCards } from './guides/guideData'
+import GuideModal from './guides/GuideModal'
+import ActivityDecisionTool from './guide-tools/ActivityDecisionTool'
+import WeeklyTimeBudgetTool from './guide-tools/WeeklyTimeBudgetTool'
 import './guides/guides.css'
+import './guide-tools/guideTools.css'
 
 type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio' | 'Lịch của tôi'
 type EventStatus = 'Đang diễn ra' | 'Chuẩn bị' | 'Sắp tới'
@@ -126,6 +130,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>('Tổng quan')
   const [showModal, setShowModal] = useState(false)
   const [selectedGuide, setSelectedGuide] = useState<GuideCardItem | null>(null)
+  const [activeTool, setActiveTool] = useState<'activity_decision' | 'time_budget' | null>(null)
   const [toast, setToast] = useState('')
   const [search, setSearch] = useState('')
   const [events, setEvents] = useState<EventItem[]>(getInitialEvents)
@@ -468,6 +473,7 @@ function App() {
             onDelete={deleteEvent}
             onNotify={notify}
             onSelectGuide={setSelectedGuide}
+            onOpenTool={(tool) => setActiveTool(tool)}
           />
         )}
       </main>
@@ -487,7 +493,30 @@ function App() {
         <GuideModal
           guide={selectedGuide}
           onClose={() => setSelectedGuide(null)}
+          onOpenTool={(tool) => {
+            setSelectedGuide(null)
+            setActiveTool(tool)
+          }}
+          onNavigateTab={(tab) => {
+            setActiveTab(tab)
+          }}
         />
+      )}
+
+      {activeTool === 'activity_decision' && (
+        <div className="guide-tool-modal-backdrop" onClick={() => setActiveTool(null)}>
+          <div className="guide-tool-modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <ActivityDecisionTool onClose={() => setActiveTool(null)} />
+          </div>
+        </div>
+      )}
+
+      {activeTool === 'time_budget' && (
+        <div className="guide-tool-modal-backdrop" onClick={() => setActiveTool(null)}>
+          <div className="guide-tool-modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <WeeklyTimeBudgetTool onClose={() => setActiveTool(null)} />
+          </div>
+        </div>
       )}
 
       {toast && <div className="toast">✓ &nbsp; {toast}</div>}
@@ -690,6 +719,7 @@ function SectionPage({
   onDelete,
   onNotify,
   onSelectGuide,
+  onOpenTool,
   search,
 }: {
   tab: Tab
@@ -699,6 +729,7 @@ function SectionPage({
   onDelete: (id: string, title: string) => void
   onNotify: (message: string) => void
   onSelectGuide: (guide: GuideCardItem) => void
+  onOpenTool?: (tool: 'activity_decision' | 'time_budget') => void
   search: string
 }) {
   const [eventSearch, setEventSearch] = useState('')
@@ -946,6 +977,32 @@ function SectionPage({
               ))}
             </div>
           </div>
+
+          {/* BANNER 2 CÔNG CỤ NHỎ (A4) */}
+          {onOpenTool && (
+            <div className="guide-tools-banner">
+              <div className="guide-tools-banner-info">
+                <h3>🛠️ Công cụ hỗ trợ sinh viên năm nhất (Freshman Balance Tools)</h3>
+                <p>Chạy trực tiếp trên trình duyệt, dữ liệu lưu trên thiết bị của bạn, không gửi lên máy chủ.</p>
+              </div>
+              <div className="guide-tools-banner-actions">
+                <button
+                  type="button"
+                  className="guide-tool-banner-btn"
+                  onClick={() => onOpenTool('activity_decision')}
+                >
+                  🎯 Bảng kiểm nhận hoạt động
+                </button>
+                <button
+                  type="button"
+                  className="guide-tool-banner-btn"
+                  onClick={() => onOpenTool('time_budget')}
+                >
+                  ⏱️ Ước lượng quỹ thời gian tuần
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -1136,68 +1193,6 @@ function CreateModal({
         <div className="modal-actions">
           <button type="button" className="secondary-btn" onClick={onClose}>Hủy</button>
           <button type="button" className="primary-btn" onClick={onSubmit}>{isEditing ? 'Cập nhật' : 'Lưu'}</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function GuideModal({
-  guide,
-  onClose,
-}: {
-  guide: GuideCardItem
-  onClose: () => void
-}) {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
-
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div
-        className="modal guide-modal"
-        onClick={(event) => event.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="modal-head">
-          <div className="guide-modal-badge-group">
-            <span className="guide-modal-icon">{guide.icon}</span>
-            <div>
-              <span className="guide-modal-tag">{guide.tag}</span>
-              <h3>{guide.title}</h3>
-            </div>
-          </div>
-          <button type="button" aria-label="Đóng modal" onClick={onClose}>✕</button>
-        </div>
-
-        <div className="guide-modal-body">
-          <p className="guide-modal-desc">{guide.text}</p>
-
-          {guide.tips && guide.tips.length > 0 && (
-            <div className="guide-modal-tips">
-              <h4>✦ Lời khuyên & Bước hành động:</h4>
-              <ul>
-                {guide.tips.map((tip, idx) => (
-                  <li key={idx}>
-                    <span className="tip-num">{idx + 1}</span>
-                    <span>{tip}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        <div className="modal-actions">
-          <button type="button" className="primary-btn" onClick={onClose}>Đã hiểu</button>
         </div>
       </div>
     </div>

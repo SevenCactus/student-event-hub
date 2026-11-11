@@ -171,3 +171,291 @@
   color: #ffffff;
   border-color: #111e38;
 }
+
+
+/* =========================================================
+   A3: 4-Part Structure Styles for GuideModal
+   ========================================================= */
+
+.guide-modal.guide-modal--enhanced {
+  width: min(640px, calc(100vw - 32px));
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-modal.guide-modal--enhanced .guide-modal-body {
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.guide-detail-four-parts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.guide-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guide-section-label .label-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #111e38;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.guide-section-label h4 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.guide-detail-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.guide-detail-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #166534;
+  width: fit-content;
+}
+
+/* Quote Box */
+.guide-quote-box {
+  margin: 0;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-left: 4px solid #3b82f6;
+  border-radius: 0 10px 10px 0;
+}
+
+.guide-quote-box p {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: #1e293b;
+}
+
+.guide-quote-box cite {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  font-style: normal;
+}
+
+/* Roadmap List */
+.guide-roadmap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.guide-roadmap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.roadmap-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #111e38;
+  color: #ffffff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.guide-roadmap-item strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.guide-roadmap-item p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.guide-roadmap-note {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Checklist */
+.guide-checklist-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.guide-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.guide-checklist-item:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.guide-checklist-item input[type="checkbox"] {
+  display: none;
+}
+
+.guide-checklist-item .checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 2px solid #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.15s ease;
+}
+
+.guide-checklist-item.done {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.guide-checklist-item.done .checkbox-custom {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.guide-checklist-item.done .checkbox-custom::after {
+  content: "✓";
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.guide-checklist-item.done .action-text {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+.action-text {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.guide-checklist-hint {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Tool Card Preview inside Modal */
+.guide-tool-card-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  flex-wrap: wrap;
+}
+
+.guide-tool-card-preview strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #1e40af;
+  margin-bottom: 2px;
+}
+
+.guide-tool-card-preview p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #3b82f6;
+  line-height: 1.4;
+}
+
+.guide-tool-nav-btn {
+  background: #1d4ed8;
+  color: #ffffff;
+  border: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.guide-tool-nav-btn:hover {
+  background: #1e40af;
+}
+
+/* Disclaimer Box */
+.guide-disclaimer-box {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.guide-disclaimer-box small {
+  display: block;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.4;
+}
