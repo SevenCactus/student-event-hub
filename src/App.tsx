@@ -573,7 +573,18 @@ function Dashboard({
               <h2>Sự kiện của tôi</h2>
               <p className="muted">Theo dõi tiến độ các hoạt động học tập và dự án</p>
             </div>
-            <button className="link-btn" onClick={() => onNotify('Đã mở danh sách sự kiện')}>Xem tất cả</button>
+            <button
+              className="link-btn"
+              onClick={() => {
+                if (onNavigateTab) {
+                  onNavigateTab('Sự kiện')
+                } else {
+                  onNotify('Đã mở danh sách sự kiện')
+                }
+              }}
+            >
+              Xem tất cả
+            </button>
           </div>
 
           <div className="event-list">
