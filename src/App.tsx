@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import AuthPage from './AuthPage'
 import { supabase, isSupabaseConfigured } from './lib/supabase'
 import PortfolioManager from './portfolio/PortfolioManager'
+import { GuideCardItem } from './guides/types'
+import { guideCards } from './guides/guideData'
+import './guides/guides.css'
 
 type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio' | 'Lịch của tôi'
 type EventStatus = 'Đang diễn ra' | 'Chuẩn bị' | 'Sắp tới'
@@ -27,90 +30,6 @@ type EventFormState = {
 }
 
 type EventFormErrors = Partial<Record<keyof EventFormState, string>>
-
-type GuideCardItem = {
-  icon: string
-  title: string
-  text: string
-  color: string
-  tag: string
-  tips: string[]
-}
-
-const guideCards: GuideCardItem[] = [
-  {
-    icon: '🧠',
-    title: 'Tiếng Anh chuyên ngành',
-    text: 'Sinh viên ngành Ngôn ngữ & CNTT thường mất thời gian khi đọc tài liệu kỹ thuật, tham gia seminar bằng tiếng Anh và viết báo cáo dự án. Đây là điểm mấu chốt giúp bạn giao tiếp chuyên nghiệp trong môi trường công nghệ.',
-    color: 'orange',
-    tag: 'English for IT',
-    tips: [
-      'Đọc tài liệu kỹ thuật chính thức (Official Docs) thay vì dùng bản dịch tự động.',
-      'Tham gia thảo luận trên GitHub, Reddit, Dev.to và Discord cộng đồng quốc tế.',
-      'Luyện tập thuyết trình ngắn 5 - 10 phút mô tả dự án và tính năng bằng tiếng Anh.',
-    ],
-  },
-  {
-    icon: '💻',
-    title: 'Lập trình & AI',
-    text: 'Việc học code, AI, GitHub và công cụ hỗ trợ vẫn là thách thức lớn đối với sinh viên mới. Cần xây dựng nền tảng kỹ năng từ cơ bản đến nâng cao.',
-    color: 'purple',
-    tag: 'Coding + AI',
-    tips: [
-      'Nắm chắc tư duy logic, cú pháp cơ bản và cấu trúc dữ liệu trước khi phụ thuộc vào AI.',
-      'Sử dụng AI như trợ lý giải thích luồng code, review chất lượng và tìm bug tiềm ẩn.',
-      'Thực hành quy trình Git & GitHub chuẩn mực cho mọi đồ án cá nhân và nhóm.',
-    ],
-  },
-  {
-    icon: '🤝',
-    title: 'Làm việc nhóm',
-    text: 'Nhiều bạn gặp khó khăn khi phối hợp trong dự án, phân công công việc, thuyết trình và xử lý mâu thuẫn giữa các thành viên trong nhóm.',
-    color: 'green',
-    tag: 'Teamwork',
-    tips: [
-      'Thống nhất quy tắc làm việc (Working Agreement), kênh liên lạc và deadline ngay từ đầu.',
-      'Minh bạch tiến độ qua bảng Kanban (Notion, Trello hoặc Jira).',
-      'Họp stand-up ngắn định kỳ để kịp thời phát hiện và tháo gỡ khúc mắc giữa các bạn.',
-    ],
-  },
-  {
-    icon: '📦',
-    title: 'Portfolio & dự án cá nhân',
-    text: 'Sinh viên cần có sản phẩm rõ ràng để chứng minh kỹ năng: project, case study, GitHub, CV, video demo và bài viết giới thiệu công việc.',
-    color: 'red',
-    tag: 'Portfolio',
-    tips: [
-      'Tập trung hoàn thiện 2 - 3 sản phẩm cốt lõi có giải quyết bài toán thực tế.',
-      'Viết tài liệu README chỉn chu: mục tiêu dự án, kiến trúc kỹ thuật và link Live Demo.',
-      'Kèm theo bài phân tích Case Study về những thử thách kỹ thuật và cách bạn vượt qua.',
-    ],
-  },
-  {
-    icon: '⏱️',
-    title: 'Quản lý thời gian',
-    text: 'Việc vừa học lập trình, vừa luyện tiếng Anh, vừa tham gia hoạt động xã hội khiến nhiều bạn mất cân bằng học tập và sức khỏe.',
-    color: 'blue',
-    tag: 'Study Life',
-    tips: [
-      'Áp dụng kỹ thuật Pomodoro và Time-blocking để chia nhỏ khung giờ học tập tập trung.',
-      'Xác định nhiệm vụ quan trọng nhất (Top 1 Priority) cần giải quyết mỗi ngày.',
-      'Duy trì cân bằng giữa học tập, thể thao và giấc ngủ để duy trì năng lượng bền bỉ.',
-    ],
-  },
-  {
-    icon: '🚀',
-    title: 'Kỹ năng nghề nghiệp',
-    text: 'Sinh viên cần hiểu rõ về CV, kỹ năng phỏng vấn, internship, networking và cách chuẩn bị cho môi trường làm việc thực tế.',
-    color: 'cyan',
-    tag: 'Career',
-    tips: [
-      'Thiết kế CV 1 trang súc tích, làm nổi bật kết quả định lượng của các dự án đã làm.',
-      'Luyện tập phỏng vấn kỹ thuật và kỹ năng trả lời theo phương pháp STAR.',
-      'Tích cực kết nối với các anh chị mentor và tiền bối trong ngành qua LinkedIn.',
-    ],
-  },
-]
 
 const EVENT_STORAGE_KEY = 'student-event-hub-events-v1'
 const EVENT_STATUS_FILTERS: EventFilterStatus[] = ['Tất cả', 'Đang diễn ra', 'Chuẩn bị', 'Sắp tới']
@@ -528,7 +447,11 @@ function App() {
             onEdit={openEditModal}
             onDelete={deleteEvent}
             onNotify={notify}
-            onSelectGuide={setSelectedGuide}
+            onSelectGuide={(guide) => {
+              setActiveTab('Cẩm nang')
+              setSelectedGuide(guide)
+            }}
+            onNavigateTab={setActiveTab}
           />
         ) : activeTab === 'Portfolio' ? (
           <PortfolioManager
@@ -579,6 +502,7 @@ function Dashboard({
   onDelete,
   onNotify,
   onSelectGuide,
+  onNavigateTab,
 }: {
   events: EventItem[]
   onCreate: () => void
@@ -586,6 +510,7 @@ function Dashboard({
   onDelete: (id: string, title: string) => void
   onNotify: (message: string) => void
   onSelectGuide: (guide: GuideCardItem) => void
+  onNavigateTab?: (tab: Tab) => void
 }) {
   return (
     <div className="page">
@@ -627,9 +552,18 @@ function Dashboard({
         <div className="panel">
           <div className="panel-head">
             <div>
-              <h2>Những câu hỏi thường gặp</h2>
-              <p className="muted">Gợi ý nhanh cho quá trình học tập và nghề nghiệp</p>
+              <h2>Cẩm nang sinh viên năm nhất</h2>
+              <p className="muted">Cân bằng học tập, điểm số và trải nghiệm thực tế</p>
             </div>
+            {onNavigateTab && (
+              <button
+                type="button"
+                className="guide-quick-switch-btn"
+                onClick={() => onNavigateTab('Cẩm nang')}
+              >
+                Mở Cẩm nang →
+              </button>
+            )}
           </div>
 
           <div className="guide-grid">
@@ -734,6 +668,20 @@ function TaskCard({ label, meta, tag, done }: { label: string; meta: string; tag
   )
 }
 
+function renderStatHighlight(text: string) {
+  const parts = text.split(/(\d+(?:\.\d+)?%|\d+(?:\.\d+)?\s*(?:giờ\/đêm|h\/đêm))/g)
+  return parts.map((part, index) => {
+    if (index % 2 === 1) {
+      return (
+        <strong key={index} className="guide-stat__num">
+          {part}
+        </strong>
+      )
+    }
+    return part
+  })
+}
+
 function SectionPage({
   tab,
   events,
@@ -760,7 +708,7 @@ function SectionPage({
     tab === 'Sự kiện'
       ? 'Quản lý sự kiện học tập'
       : tab === 'Cẩm nang'
-        ? 'Cẩm nang sinh viên Ngôn ngữ & CNTT'
+        ? 'Cẩm nang sinh viên năm nhất'
         : tab === 'Lịch của tôi'
           ? 'Lịch của tôi'
           : 'Portfolio & kết quả học tập'
@@ -880,6 +828,9 @@ function SectionPage({
   }
 
   if (tab === 'Cẩm nang') {
+    const balanceCards = displayCards.filter((card) => card.category === 'balance')
+    const careerCards = displayCards.filter((card) => card.category === 'career')
+
     return (
       <div className="page">
         <div className="section-header">
@@ -892,43 +843,108 @@ function SectionPage({
 
         <div className="panel section-panel">
           <div className="section-intro">
-            <h2>Khó khăn thực tế của sinh viên ngành Ngôn ngữ & Công nghệ thông tin</h2>
+            <h2>Cẩm nang sinh viên năm nhất (Freshman Balance Hub)</h2>
             <p className="muted">
-              Đây là những vấn đề mà sinh viên thường gặp trong quá trình học tập và phát triển nghề nghiệp: mất cân bằng kỹ năng,
-              áp lực mới với công nghệ, khả năng giao tiếp bằng tiếng Anh và việc xây dựng hồ sơ năng lực cá nhân.
+              Những khó khăn thực tế khi vừa học, vừa xây dựng trải nghiệm ở năm nhất, dựa trên khảo sát 120 sinh viên và 4 buổi phỏng vấn của nhóm.
             </p>
           </div>
 
-          <div className="guide-grid full">
-            {displayCards.map((card) => (
-              <div
-                key={card.title}
-                className={`guide-card ${card.color}`}
-                onClick={() => onSelectGuide(card)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && onSelectGuide(card)}
-              >
-                <div>
-                  <span>{card.icon}</span>
-                  <h3>{card.title}</h3>
-                  <p>{card.text}</p>
-                </div>
-                <div className="guide-card-footer">
-                  <small>{card.tag}</small>
-                  <button
-                    type="button"
-                    className="guide-card-btn"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onSelectGuide(card)
-                    }}
-                  >
-                    Xem chi tiết ↗
-                  </button>
-                </div>
+          {/* NHÓM 1: Cân bằng học tập – trải nghiệm */}
+          <div className="guide-section-group">
+            <div className="guide-group-head">
+              <div>
+                <h2>⚖️ Cân bằng học tập – trải nghiệm</h2>
+                <p className="guide-group-desc">
+                  Giải quyết các thách thức về thời gian, GPA, lựa chọn hoạt động và sức khỏe tinh thần năm nhất.
+                </p>
               </div>
-            ))}
+              <span className="guide-group-badge">Khảo sát 120 sinh viên</span>
+            </div>
+
+            <div className="guide-grid full">
+              {balanceCards.map((card) => (
+                <div
+                  key={card.id || card.title}
+                  className={`guide-card guide-card--balance ${card.color}`}
+                  onClick={() => onSelectGuide(card)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && onSelectGuide(card)}
+                >
+                  <div className="guide-card__body">
+                    <span>{card.icon}</span>
+                    <h3>{card.title}</h3>
+                    <p>{card.text}</p>
+                    {card.statHighlight && (
+                      <div className="guide-stat">
+                        <div className="guide-stat__icon" aria-hidden="true">📊</div>
+                        <div className="guide-stat__text">
+                          {renderStatHighlight(card.statHighlight)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="guide-card-footer">
+                    <small>{card.tag}</small>
+                    <button
+                      type="button"
+                      className="guide-card-btn"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSelectGuide(card)
+                      }}
+                    >
+                      Xem chi tiết ↗
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* NHÓM 2: Kỹ năng theo ngành (Giữ nguyên 3 thẻ) */}
+          <div className="guide-section-group" style={{ marginTop: '36px' }}>
+            <div className="guide-group-head">
+              <div>
+                <h2>🚀 Kỹ năng theo ngành</h2>
+                <p className="guide-group-desc">
+                  Kỹ năng chuyên môn nền tảng cho sinh viên ngành Ngôn ngữ & Công nghệ thông tin.
+                </p>
+              </div>
+              <span className="guide-group-badge">Kỹ năng cốt lõi</span>
+            </div>
+
+            <div className="guide-grid full">
+              {careerCards.map((card) => (
+                <div
+                  key={card.id || card.title}
+                  className={`guide-card ${card.color}`}
+                  onClick={() => onSelectGuide(card)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && onSelectGuide(card)}
+                >
+                  <div>
+                    <span>{card.icon}</span>
+                    <h3>{card.title}</h3>
+                    <p>{card.text}</p>
+                  </div>
+                  <div className="guide-card-footer">
+                    <small>{card.tag}</small>
+                    <button
+                      type="button"
+                      className="guide-card-btn"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSelectGuide(card)
+                      }}
+                    >
+                      Xem chi tiết ↗
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

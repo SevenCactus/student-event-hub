@@ -1,0 +1,173 @@
+/* Styles scoped for Freshman Balance Hub Guides */
+
+.guide-section-group {
+  margin-bottom: 32px;
+}
+
+.guide-group-head {
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guide-group-head h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111e38;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guide-group-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.guide-group-desc {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+/* =========================================================
+   Responsive Grid (Requirement 4 & 6)
+   - Desktop: 3 columns
+   - Tablet (641px - 1024px): 2 columns
+   - Mobile (<= 640px): 1 column
+   ========================================================= */
+.guide-section-group .guide-grid.full {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch; /* All cards in the same row have equal height */
+}
+
+@media (max-width: 1024px) and (min-width: 641px) {
+  .guide-section-group .guide-grid.full {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .guide-section-group .guide-grid.full {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =========================================================
+   Balance Card Container (Requirement 4 & 5)
+   - Auto height, no fixed overflow
+   - Margin-top auto for footer so tags & buttons sit at bottom
+   ========================================================= */
+.guide-card.guide-card--balance {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: auto;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.guide-card.guide-card--balance .guide-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.guide-card.guide-card--balance .guide-card-footer {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+/* =========================================================
+   Stat Box (Requirement 1, 2, 3)
+   - Flex row, icon fixed ~32px, text flex: 1 with min-width: 0
+   - Font size 14px, line-height 1.4, bold numbers
+   ========================================================= */
+.guide-stat {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(18, 32, 51, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Icon box: fixed ~32px, flex-shrink: 0 */
+.guide-stat__icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f0fdf4;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  font-size: 15px;
+  line-height: 1;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+/* Text box: flex: 1, min-width: 0 to wrap normally across card width */
+.guide-stat__text {
+  flex: 1 1 0%;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #334155;
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
+  margin: 0;
+  padding: 0;
+}
+
+/* Bolded numbers inside stat text */
+.guide-stat__text strong,
+.guide-stat__num {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Quick shortcut button on main page */
+.guide-quick-switch-btn {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.guide-quick-switch-btn:hover {
+  background: #111e38;
+  color: #ffffff;
+  border-color: #111e38;
+}
