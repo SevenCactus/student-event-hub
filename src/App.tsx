@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AuthPage from './AuthPage'
 import { supabase, isSupabaseConfigured } from './lib/supabase'
+import PortfolioManager from './portfolio/PortfolioManager'
 
 type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio' | 'Lịch của tôi'
 type EventStatus = 'Đang diễn ra' | 'Chuẩn bị' | 'Sắp tới'
@@ -528,6 +529,11 @@ function App() {
             onDelete={deleteEvent}
             onNotify={notify}
             onSelectGuide={setSelectedGuide}
+          />
+        ) : activeTab === 'Portfolio' ? (
+          <PortfolioManager
+            events={events}
+            onNotify={notify}
           />
         ) : (
           <SectionPage
