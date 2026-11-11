@@ -279,3 +279,4 @@ export default function WeeklyTimeBudgetTool({ onClose }: { onClose?: () => void
     </div>
   )
 }
+
