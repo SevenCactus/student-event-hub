@@ -542,6 +542,31 @@ function App() {
   )
 }
 
+function getLiveDateTimeString(d: Date = new Date()): string {
+  const dayNames = ['CHỦ NHẬT', 'THỨ HAI', 'THỨ BA', 'THỨ TƯ', 'THỨ NĂM', 'THỨ SÁU', 'THỨ BẢY']
+  const dayName = dayNames[d.getDay()]
+  const day = d.getDate()
+  const month = d.getMonth() + 1
+  const year = d.getFullYear()
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  const seconds = String(d.getSeconds()).padStart(2, '0')
+  return `${dayName}, ${day} THÁNG ${month}, ${year} • ${hours}:${minutes}:${seconds}`
+}
+
+function LiveDateTimeEyebrow() {
+  const [timeStr, setTimeStr] = useState<string>(() => getLiveDateTimeString())
+
+  useEffect(() => {
+    const update = () => setTimeStr(getLiveDateTimeString())
+    update()
+    const timer = setInterval(update, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return <p className="eyebrow">{timeStr}</p>
+}
+
 function Dashboard({
   userName,
   events,
@@ -565,7 +590,7 @@ function Dashboard({
     <div className="page">
       <div className="hero-panel">
         <div>
-          <p className="eyebrow">THỨ BA, 22 THÁNG 9, 2026</p>
+          <LiveDateTimeEyebrow />
           <h1>Chào bạn, {userName || 'Sinh viên'} <span>👋</span></h1>
           <p className="muted">
             Bạn đang trên hành trình trở thành sinh viên ngành Ngôn ngữ & CNTT với nhiều thách thức thực tế:
