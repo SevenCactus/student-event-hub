@@ -417,7 +417,6 @@ function App() {
             <span>□</span>
             Lịch của tôi
           </button>
-          <button className="nav-item" onClick={() => notify('Đã mở phần cơ hội')}><span>♢</span>Cơ hội</button>
         </nav>
 
         <div className="help-card" onClick={() => setShowAssistant(true)} style={{ cursor: 'pointer' }}>
@@ -445,6 +444,7 @@ function App() {
 
         {activeTab === 'Tổng quan' ? (
           <Dashboard
+            userName={currentUser?.full_name}
             events={events}
             onCreate={openCreateModal}
             onEdit={openEditModal}
@@ -532,6 +532,7 @@ function App() {
 }
 
 function Dashboard({
+  userName,
   events,
   onCreate,
   onEdit,
@@ -540,6 +541,7 @@ function Dashboard({
   onSelectGuide,
   onNavigateTab,
 }: {
+  userName?: string
   events: EventItem[]
   onCreate: () => void
   onEdit: (event: EventItem) => void
@@ -553,7 +555,7 @@ function Dashboard({
       <div className="hero-panel">
         <div>
           <p className="eyebrow">THỨ BA, 22 THÁNG 9, 2026</p>
-          <h1>Chào bạn, Seven <span>👋</span></h1>
+          <h1>Chào bạn, {userName || 'Sinh viên'} <span>👋</span></h1>
           <p className="muted">
             Bạn đang trên hành trình trở thành sinh viên ngành Ngôn ngữ & CNTT với nhiều thách thức thực tế:
             kỹ năng tiếng Anh, lập trình, AI, làm việc nhóm và xây dựng portfolio cá nhân.

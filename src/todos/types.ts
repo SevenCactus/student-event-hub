@@ -22,3 +22,4 @@ export type TodoItem = {
 }
 
 export type TodoFilter = 'all' | 'pending' | 'completed'
+
