@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import AuthPage from './AuthPage'
+import { supabase, isSupabaseConfigured } from './lib/supabase'
 
 type Tab = 'Tổng quan' | 'Sự kiện' | 'Cẩm nang' | 'Portfolio' | 'Lịch của tôi'
 type EventStatus = 'Đang diễn ra' | 'Chuẩn bị' | 'Sắp tới'
@@ -26,13 +27,27 @@ type EventFormState = {
 
 type EventFormErrors = Partial<Record<keyof EventFormState, string>>
 
-const guideCards = [
+type GuideCardItem = {
+  icon: string
+  title: string
+  text: string
+  color: string
+  tag: string
+  tips: string[]
+}
+
+const guideCards: GuideCardItem[] = [
   {
     icon: '🧠',
     title: 'Tiếng Anh chuyên ngành',
     text: 'Sinh viên ngành Ngôn ngữ & CNTT thường mất thời gian khi đọc tài liệu kỹ thuật, tham gia seminar bằng tiếng Anh và viết báo cáo dự án. Đây là điểm mấu chốt giúp bạn giao tiếp chuyên nghiệp trong môi trường công nghệ.',
     color: 'orange',
     tag: 'English for IT',
+    tips: [
+      'Đọc tài liệu kỹ thuật chính thức (Official Docs) thay vì dùng bản dịch tự động.',
+      'Tham gia thảo luận trên GitHub, Reddit, Dev.to và Discord cộng đồng quốc tế.',
+      'Luyện tập thuyết trình ngắn 5 - 10 phút mô tả dự án và tính năng bằng tiếng Anh.',
+    ],
   },
   {
     icon: '💻',
@@ -40,6 +55,11 @@ const guideCards = [
     text: 'Việc học code, AI, GitHub và công cụ hỗ trợ vẫn là thách thức lớn đối với sinh viên mới. Cần xây dựng nền tảng kỹ năng từ cơ bản đến nâng cao.',
     color: 'purple',
     tag: 'Coding + AI',
+    tips: [
+      'Nắm chắc tư duy logic, cú pháp cơ bản và cấu trúc dữ liệu trước khi phụ thuộc vào AI.',
+      'Sử dụng AI như trợ lý giải thích luồng code, review chất lượng và tìm bug tiềm ẩn.',
+      'Thực hành quy trình Git & GitHub chuẩn mực cho mọi đồ án cá nhân và nhóm.',
+    ],
   },
   {
     icon: '🤝',
@@ -47,6 +67,11 @@ const guideCards = [
     text: 'Nhiều bạn gặp khó khăn khi phối hợp trong dự án, phân công công việc, thuyết trình và xử lý mâu thuẫn giữa các thành viên trong nhóm.',
     color: 'green',
     tag: 'Teamwork',
+    tips: [
+      'Thống nhất quy tắc làm việc (Working Agreement), kênh liên lạc và deadline ngay từ đầu.',
+      'Minh bạch tiến độ qua bảng Kanban (Notion, Trello hoặc Jira).',
+      'Họp stand-up ngắn định kỳ để kịp thời phát hiện và tháo gỡ khúc mắc giữa các bạn.',
+    ],
   },
   {
     icon: '📦',
@@ -54,6 +79,11 @@ const guideCards = [
     text: 'Sinh viên cần có sản phẩm rõ ràng để chứng minh kỹ năng: project, case study, GitHub, CV, video demo và bài viết giới thiệu công việc.',
     color: 'red',
     tag: 'Portfolio',
+    tips: [
+      'Tập trung hoàn thiện 2 - 3 sản phẩm cốt lõi có giải quyết bài toán thực tế.',
+      'Viết tài liệu README chỉn chu: mục tiêu dự án, kiến trúc kỹ thuật và link Live Demo.',
+      'Kèm theo bài phân tích Case Study về những thử thách kỹ thuật và cách bạn vượt qua.',
+    ],
   },
   {
     icon: '⏱️',
@@ -61,6 +91,11 @@ const guideCards = [
     text: 'Việc vừa học lập trình, vừa luyện tiếng Anh, vừa tham gia hoạt động xã hội khiến nhiều bạn mất cân bằng học tập và sức khỏe.',
     color: 'blue',
     tag: 'Study Life',
+    tips: [
+      'Áp dụng kỹ thuật Pomodoro và Time-blocking để chia nhỏ khung giờ học tập tập trung.',
+      'Xác định nhiệm vụ quan trọng nhất (Top 1 Priority) cần giải quyết mỗi ngày.',
+      'Duy trì cân bằng giữa học tập, thể thao và giấc ngủ để duy trì năng lượng bền bỉ.',
+    ],
   },
   {
     icon: '🚀',
@@ -68,6 +103,11 @@ const guideCards = [
     text: 'Sinh viên cần hiểu rõ về CV, kỹ năng phỏng vấn, internship, networking và cách chuẩn bị cho môi trường làm việc thực tế.',
     color: 'cyan',
     tag: 'Career',
+    tips: [
+      'Thiết kế CV 1 trang súc tích, làm nổi bật kết quả định lượng của các dự án đã làm.',
+      'Luyện tập phỏng vấn kỹ thuật và kỹ năng trả lời theo phương pháp STAR.',
+      'Tích cực kết nối với các anh chị mentor và tiền bối trong ngành qua LinkedIn.',
+    ],
   },
 ]
 
@@ -162,14 +202,77 @@ const getInitialEvents = (): EventItem[] => {
 
 function App() {
   const [showAuth, setShowAuth] = useState(true)
+  const [currentUser, setCurrentUser] = useState<{ id: string; email?: string; full_name?: string } | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('Tổng quan')
   const [showModal, setShowModal] = useState(false)
+  const [selectedGuide, setSelectedGuide] = useState<GuideCardItem | null>(null)
   const [toast, setToast] = useState('')
   const [search, setSearch] = useState('')
   const [events, setEvents] = useState<EventItem[]>(getInitialEvents)
   const [modalForm, setModalForm] = useState<EventFormState>(emptyForm())
   const [editingEventId, setEditingEventId] = useState<string | null>(null)
   const [formErrors, setFormErrors] = useState<EventFormErrors>({})
+
+  // Kiểm tra phiên đăng nhập từ Supabase
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email,
+          full_name: (session.user.user_metadata?.full_name as string) || session.user.email?.split('@')[0] || 'Sinh viên',
+        })
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email,
+          full_name: (session.user.user_metadata?.full_name as string) || session.user.email?.split('@')[0] || 'Sinh viên',
+        })
+      } else {
+        setCurrentUser(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Tải danh sách sự kiện từ Supabase nếu đã cấu hình
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+
+    async function fetchSupabaseEvents() {
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('date', { ascending: true })
+
+        if (!error && data && data.length > 0) {
+          setEvents(
+            data.map((item) => ({
+              id: item.id,
+              title: item.title,
+              date: item.date,
+              status: item.status,
+              progress: Number(item.progress),
+              people: Number(item.people),
+              color: getStatusColor(item.status),
+            }))
+          )
+        }
+      } catch (err) {
+        console.warn('Supabase fetch failed, using local storage:', err)
+      }
+    }
+
+    fetchSupabaseEvents()
+  }, [])
 
   useEffect(() => {
     window.localStorage.setItem(EVENT_STORAGE_KEY, JSON.stringify(events))
@@ -259,6 +362,46 @@ function App() {
       return [nextEvent, ...currentEvents]
     })
 
+    // Đồng bộ lên Supabase nếu có kết nối
+    if (isSupabaseConfigured) {
+      if (editingEventId) {
+        supabase
+          .from('events')
+          .update({
+            title: nextEvent.title,
+            date: nextEvent.date,
+            status: nextEvent.status,
+            progress: nextEvent.progress,
+            people: nextEvent.people,
+            color: nextEvent.color,
+          })
+          .eq('id', editingEventId)
+          .then(({ error }) => {
+            if (error) console.warn('Supabase update event error:', error)
+          })
+      } else {
+        supabase
+          .from('events')
+          .insert({
+            title: nextEvent.title,
+            date: nextEvent.date,
+            status: nextEvent.status,
+            progress: nextEvent.progress,
+            people: nextEvent.people,
+            color: nextEvent.color,
+            user_id: currentUser?.id ?? null,
+          })
+          .select('id')
+          .then(({ data, error }) => {
+            if (!error && data?.[0]?.id) {
+              setEvents((currentEvents) =>
+                currentEvents.map((e) => (e.id === nextEvent.id ? { ...e, id: data[0].id } : e))
+              )
+            }
+          })
+      }
+    }
+
     notify(editingEventId ? 'Đã cập nhật sự kiện thành công' : 'Đã tạo sự kiện mới thành công')
     closeModal()
   }
@@ -269,6 +412,17 @@ function App() {
     }
 
     setEvents((currentEvents) => currentEvents.filter((event) => event.id !== eventId))
+
+    if (isSupabaseConfigured) {
+      supabase
+        .from('events')
+        .delete()
+        .eq('id', eventId)
+        .then(({ error }) => {
+          if (error) console.warn('Supabase delete event error:', error)
+        })
+    }
+
     notify('Đã xóa sự kiện')
   }
 
@@ -288,12 +442,38 @@ function App() {
         </div>
 
         <div className="profile-mini">
-          <div className="avatar">LT</div>
-          <div>
-            <b>Seven Cactus</b>
-            <small>Sinh viên • K18</small>
+          <div className="avatar">
+            {currentUser?.full_name ? currentUser.full_name.slice(0, 2).toUpperCase() : 'LT'}
           </div>
-          <span>⌄</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <b style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {currentUser?.full_name || 'Seven Cactus'}
+            </b>
+            <small style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {currentUser?.email || 'Sinh viên • K18'}
+            </small>
+          </div>
+          {currentUser && (
+            <button
+              type="button"
+              title="Đăng xuất"
+              onClick={() => {
+                supabase.auth.signOut()
+                setCurrentUser(null)
+                notify('Đã đăng xuất')
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'rgba(237, 244, 255, 0.6)',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                padding: '4px',
+              }}
+            >
+              ⎋
+            </button>
+          )}
         </div>
 
         <nav className="nav">
@@ -347,6 +527,7 @@ function App() {
             onEdit={openEditModal}
             onDelete={deleteEvent}
             onNotify={notify}
+            onSelectGuide={setSelectedGuide}
           />
         ) : (
           <SectionPage
@@ -357,6 +538,7 @@ function App() {
             onEdit={openEditModal}
             onDelete={deleteEvent}
             onNotify={notify}
+            onSelectGuide={setSelectedGuide}
           />
         )}
       </main>
@@ -372,6 +554,13 @@ function App() {
         />
       )}
 
+      {selectedGuide && (
+        <GuideModal
+          guide={selectedGuide}
+          onClose={() => setSelectedGuide(null)}
+        />
+      )}
+
       {toast && <div className="toast">✓ &nbsp; {toast}</div>}
     </div>
   )
@@ -383,12 +572,14 @@ function Dashboard({
   onEdit,
   onDelete,
   onNotify,
+  onSelectGuide,
 }: {
   events: EventItem[]
   onCreate: () => void
   onEdit: (event: EventItem) => void
   onDelete: (id: string, title: string) => void
   onNotify: (message: string) => void
+  onSelectGuide: (guide: GuideCardItem) => void
 }) {
   return (
     <div className="page">
@@ -437,11 +628,32 @@ function Dashboard({
 
           <div className="guide-grid">
             {guideCards.slice(0, 4).map((card) => (
-              <div key={card.title} className={`guide-card ${card.color}`}>
-                <span>{card.icon}</span>
-                <h3>{card.title}</h3>
-                <p>{card.text}</p>
-                <small>{card.tag}</small>
+              <div
+                key={card.title}
+                className={`guide-card ${card.color}`}
+                onClick={() => onSelectGuide(card)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && onSelectGuide(card)}
+              >
+                <div>
+                  <span>{card.icon}</span>
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
+                </div>
+                <div className="guide-card-footer">
+                  <small>{card.tag}</small>
+                  <button
+                    type="button"
+                    className="guide-card-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onSelectGuide(card)
+                    }}
+                  >
+                    Xem chi tiết ↗
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -523,6 +735,7 @@ function SectionPage({
   onEdit,
   onDelete,
   onNotify,
+  onSelectGuide,
   search,
 }: {
   tab: Tab
@@ -531,6 +744,7 @@ function SectionPage({
   onEdit: (event: EventItem) => void
   onDelete: (id: string, title: string) => void
   onNotify: (message: string) => void
+  onSelectGuide: (guide: GuideCardItem) => void
   search: string
 }) {
   const [eventSearch, setEventSearch] = useState('')
@@ -681,11 +895,32 @@ function SectionPage({
 
           <div className="guide-grid full">
             {displayCards.map((card) => (
-              <div key={card.title} className={`guide-card ${card.color}`}>
-                <span>{card.icon}</span>
-                <h3>{card.title}</h3>
-                <p>{card.text}</p>
-                <small>{card.tag}</small>
+              <div
+                key={card.title}
+                className={`guide-card ${card.color}`}
+                onClick={() => onSelectGuide(card)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && onSelectGuide(card)}
+              >
+                <div>
+                  <span>{card.icon}</span>
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
+                </div>
+                <div className="guide-card-footer">
+                  <small>{card.tag}</small>
+                  <button
+                    type="button"
+                    className="guide-card-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onSelectGuide(card)
+                    }}
+                  >
+                    Xem chi tiết ↗
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -879,6 +1114,68 @@ function CreateModal({
         <div className="modal-actions">
           <button type="button" className="secondary-btn" onClick={onClose}>Hủy</button>
           <button type="button" className="primary-btn" onClick={onSubmit}>{isEditing ? 'Cập nhật' : 'Lưu'}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function GuideModal({
+  guide,
+  onClose,
+}: {
+  guide: GuideCardItem
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div
+        className="modal guide-modal"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="modal-head">
+          <div className="guide-modal-badge-group">
+            <span className="guide-modal-icon">{guide.icon}</span>
+            <div>
+              <span className="guide-modal-tag">{guide.tag}</span>
+              <h3>{guide.title}</h3>
+            </div>
+          </div>
+          <button type="button" aria-label="Đóng modal" onClick={onClose}>✕</button>
+        </div>
+
+        <div className="guide-modal-body">
+          <p className="guide-modal-desc">{guide.text}</p>
+
+          {guide.tips && guide.tips.length > 0 && (
+            <div className="guide-modal-tips">
+              <h4>✦ Lời khuyên & Bước hành động:</h4>
+              <ul>
+                {guide.tips.map((tip, idx) => (
+                  <li key={idx}>
+                    <span className="tip-num">{idx + 1}</span>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className="modal-actions">
+          <button type="button" className="primary-btn" onClick={onClose}>Đã hiểu</button>
         </div>
       </div>
     </div>

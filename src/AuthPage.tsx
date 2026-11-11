@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { supabase, isSupabaseConfigured } from './lib/supabase'
 
 type AuthMode = 'login' | 'register'
 
@@ -7,6 +8,7 @@ export default function AuthPage({ onExplore }: { onExplore: () => void }) {
   const [mode, setMode] = useState<AuthMode>('login')
   const [showPassword, setShowPassword] = useState(false)
   const [notice, setNotice] = useState('')
+  const [loading, setLoading] = useState(false)
   const isRegister = mode === 'register'
 
   const switchMode = (nextMode: AuthMode) => {
@@ -15,11 +17,12 @@ export default function AuthPage({ onExplore }: { onExplore: () => void }) {
     setShowPassword(false)
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = event.currentTarget
     const fields = new FormData(form)
     const name = String(fields.get('name') ?? '').trim()
+    const email = String(fields.get('email') ?? '').trim()
     const password = String(fields.get('password') ?? '')
     const confirmPassword = String(fields.get('confirmPassword') ?? '')
 
@@ -35,12 +38,48 @@ export default function AuthPage({ onExplore }: { onExplore: () => void }) {
       return
     }
 
-    // shortcut: UI preview only; connect an authentication service before accepting real accounts.
-    form.reset()
-    setShowPassword(false)
-    setNotice(isRegister
-      ? 'Thông tin hợp lệ. Đây là bản xem thử nên tài khoản chưa được tạo. Bạn có thể khám phá LEEP bên dưới.'
-      : 'Đây là bản xem thử nên chưa thể xác thực tài khoản. Bạn có thể khám phá LEEP bên dưới.')
+    if (!isSupabaseConfigured) {
+      form.reset()
+      setShowPassword(false)
+      setNotice(isRegister
+        ? 'Thông tin hợp lệ. Để lưu tài khoản vào cơ sở dữ liệu Supabase, hãy dán VITE_SUPABASE_ANON_KEY vào file .env. Bạn có thể nhấn "Trải nghiệm LEEP" để dùng thử ngay.'
+        : 'Chưa phát hiện VITE_SUPABASE_ANON_KEY trong .env. Bạn có thể nhấn "Trải nghiệm LEEP" bên dưới để dùng thử.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      if (isRegister) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+          },
+        })
+        if (error) {
+          setNotice(`Lỗi đăng ký: ${error.message}`)
+        } else {
+          setNotice('Đăng ký thành công! Hãy kiểm tra email (nếu có xác thực) hoặc đăng nhập để tiếp tục.')
+          setMode('login')
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+        if (error) {
+          setNotice(`Đăng nhập thất bại: ${error.message}`)
+        } else {
+          onExplore()
+        }
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Không thể kết nối'
+      setNotice(`Đã xảy ra lỗi: ${message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -112,7 +151,10 @@ export default function AuthPage({ onExplore }: { onExplore: () => void }) {
             </div>}
 
             {notice && <p className="auth-notice" role="status">{notice}</p>}
-            <button type="submit" className="primary-btn auth-submit">{isRegister ? 'Tạo tài khoản' : 'Đăng nhập'}<span aria-hidden="true">→</span></button>
+            <button type="submit" className="primary-btn auth-submit" disabled={loading}>
+              {loading ? 'Đang xử lý...' : (isRegister ? 'Tạo tài khoản' : 'Đăng nhập')}
+              <span aria-hidden="true">→</span>
+            </button>
           </form>
 
           <p className="auth-switch-prompt">{isRegister ? 'Bạn đã có tài khoản?' : 'Bạn chưa có tài khoản?'} <button type="button" onClick={() => switchMode(isRegister ? 'login' : 'register')}>{isRegister ? 'Đăng nhập' : 'Đăng ký ngay'}</button></p>
